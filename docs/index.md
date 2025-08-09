@@ -1,679 +1,318 @@
-# Spring Modulith en la Práctica
-## Arquitecturas Modulares y CQRS
+# Workshop: CQRS con Spring Modulith desde Cero
 
----
+## Bienvenido al Taller Práctico
 
-## Agenda
+**Duración**: 1.5 horas  
+**Nivel**: Intermedio  
+**Prerequisitos**: Conocimientos básicos de Spring Boot y Java
 
-1. Introducción a la arquitectura modular
-2. Problemas del monolito tradicional
-3. Spring Modulith como solución
-4. Conceptos clave de Spring Modulith
-5. Implementando CQRS con Spring Modulith
-6. Caso práctico: Transformando un e-commerce
-7. Testing de aplicaciones modulares
-8. Comunicación basada en eventos
-9. Mejores prácticas y antipatrones
-10. Conclusiones y recursos
+## ¿Qué es Spring Modulith?
 
----
+Spring Modulith es una solución arquitectónica que te permite construir **monolitos modulares** - aplicaciones que combinan la simplicidad del monolito con la organización clara de los microservicios.
 
-## 1. Introducción a la Arquitectura Modular
+### El Problema que Resuelve
 
-[IMAGEN 1: Diagrama de código acoplado en monolitos tradicionales]
-
-* **¿Qué es una arquitectura modular?**
-  * Diseño que divide la aplicación en módulos independientes
-  * Cada módulo tiene responsabilidades bien definidas
-  * Interfaces claras entre módulos
-
-* **Beneficios:**
-  * Mejor organización del código
-  * Mayor mantenibilidad
-  * Desarrollo paralelo
-  * Testing independiente
-  * Escalabilidad selectiva
-
----
-
-## 2. Problemas del Monolito Tradicional
-
-[IMAGEN 1: Diagrama de código acoplado en monolitos tradicionales]
-
-* **Organización por capas (package-by-layer):**
-  * Controllers, Services, Repositories, Entities...
-  * No expresa el propósito de negocio de la aplicación
-
-* **Acoplamiento elevado:**
-  * Clases públicas accesibles desde cualquier lugar
-  * Dependencias implícitas difíciles de rastrear
-
-* **Desafíos:**
-  * Código espagueti
-  * Difícil añadir o modificar funcionalidades
-  * Testing complejo
-  * Dificultad para escalar partes específicas
-
----
-
-## 3. Spring Modulith como Solución
-
-[IMAGEN 10: Diagrama de BookStore Modulith con módulos]
-
-* **Spring Modulith:**
-  * Extensión de Spring Boot para arquitecturas modulares
-  * Permite crear "monolitos modulares"
-  * Facilita la evolución hacia microservicios (si es necesario)
-
-* **Características principales:**
-  * Verificación de fronteras entre módulos
-  * Comunicación basada en eventos
-  * Soporte para testing modular
-  * Documentación automática (Modelo C4)
-
----
-
-## 4. Conceptos Clave de Spring Modulith
-
-[IMAGEN 11: Diagrama mostrando módulos con APIs y componentes internos]
-
-* **Módulos de aplicación:**
-  * Paquetes de nivel superior bajo el paquete de aplicación
-  * Cada módulo tiene su API pública y componentes internos
-
-* **Tipos de módulos:**
-  * **Simple:** API pública limitada
-  * **OPEN:** Todo el contenido es público
-  * **Advanced:** Control detallado de la exposición
-
-* **NamedInterfaces:**
-  * Exponer tipos o paquetes adicionales
-  * Control granular de la API pública
-
----
-
-## 5. CQRS: Command Query Responsibility Segregation
-
-[IMAGEN 11: Diagrama mostrando módulos con APIs y componentes internos]
-
-* **Fundamentos de CQRS:**
-  * Separación de operaciones de lectura y escritura
-  * Commands: modifican estado (escriben)
-  * Queries: recuperan información (leen)
-
-* **Beneficios con Spring Modulith:**
-  * Modelos optimizados para cada caso de uso
-  * Escalabilidad independiente
-  * Rendimiento mejorado para lecturas
-  * Menor contención de recursos
-
----
-
-## 6. Dos Enfoques para CQRS con Spring Modulith
-
-* **Enfoque 1: CQRS como estructura de módulos**
-  ```
-  gae.piaz.modulith.cqrs/  
-  ├── command/  (CLOSED module)
-  │   ├── api/  
-  │   ├── domain/ 
-  │   └── events/
-  ├── query/    (CLOSED module)
-  │   ├── api/
-  │   ├── domain/  
-  └── shared/    (OPEN module)
-  ```
-
-* **Enfoque 2: CQRS dentro del módulo (recomendado)**
-  ```
-  com.example.products/  (MODULE)
-  ├── command/  
-  │   ├── api/  
-  │   └── internal/ 
-  ├── query/    
-  │   ├── api/
-  │   └── internal/  
-  └── shared/    
-  ```
-
----
-
-## 7. Implementando CQRS con Spring Modulith
-
-* **Domain Events como puente:**
+¿Te ha pasado esto?
 
 ```java
-// Command Side
+// Al inicio: todo limpio y organizado
+@RestController 
+public class ProductController {
+    private final ProductService productService;
+}
+
+// Después de 6 meses: bajo presión de entrega
+@RestController
+public class ProductController {
+    @Autowired private ProductService productService;
+    @Autowired private UserRepository userRepository;    // ¿Por qué está aquí?
+    @Autowired private OrderService orderService;       // Esto no debería estar
+    @Autowired private EmailService emailService;       // Tampoco esto
+}
+```
+
+**¿Qué pasó?** Bajo presión, los desarrolladores toman atajos y el código se vuelve un "gran bola de barro".
+
+### La Solución: Monolitos Modulares
+
+Spring Modulith te da **reglas arquitectónicas automáticas** que previenen este deterioro:
+
+- **Módulos independientes** con límites claros
+- **Testing automático** de la arquitectura 
+- **Comunicación controlada** entre módulos
+- **Documentación automática** siempre actualizada
+
+## ¿Qué Construiremos?
+
+Durante el taller implementaremos una **tienda online** con arquitectura CQRS y módulos independientes:
+
+```
+📦 store-cqrs/
+├── 🛍️ products/          # Catálogo de productos
+│   ├── command/          # Operaciones de escritura
+│   ├── query/            # Operaciones de lectura  
+│   └── events/           # Comunicación entre módulos
+├── 🔧 common/            # Utilidades compartidas
+└── 📋 config/            # Configuración global
+```
+
+### Funcionalidades Implementadas
+
+**Gestión de Productos**:
+- Crear y actualizar productos
+- Agregar reviews y calificaciones
+- Consultas optimizadas por categoría y rating
+
+**Arquitectura CQRS**:
+- **Lado Command**: Modelos para escritura (consistencia)
+- **Lado Query**: Modelos para lectura (performance)
+- **Sincronización automática** via eventos
+
+**Observabilidad**:
+- Trazabilidad entre módulos con Zipkin
+- Métricas y health checks
+- Eventos externos con Kafka
+
+## Estructura del Workshop
+
+### Parte 1: Fundamentos (30 min)
+- ¿Por qué Spring Modulith?
+- Configuración del proyecto
+- Primer módulo funcional
+- Verificación de reglas arquitectónicas
+
+### Parte 2: CQRS en Acción (45 min)  
+- Implementación lado Command
+- Implementación lado Query
+- Eventos entre módulos
+- Testing independiente
+
+### Parte 3: Producción (15 min)
+- Observabilidad con Zipkin
+- Automatización con Taskfile
+- Deployment con Docker
+- Demo final completo
+
+## Pre-requisitos Técnicos
+
+### Software Necesario
+
+- **Java 21+** 
+- **Maven 3.8+**
+- **Docker Desktop**
+- **IDE** (IntelliJ IDEA, VS Code, Eclipse)
+- **Git**
+
+### Verificación del Entorno
+```bash
+# Verificar instalaciones
+java -version    # Debe mostrar Java 17+
+mvn -version     # Debe mostrar Maven 3.8+
+docker --version # Docker funcionando
+```
+
+### Opcional: Taskfile
+```bash
+# Instalar Taskfile para automatización
+# macOS: brew install go-task/tap/go-task
+# Windows: choco install go-task
+# Linux: sh -c "$(curl -ssL https://taskfile.dev/install.sh)"
+```
+
+## ¿Qué Aprenderás?
+
+Al finalizar el workshop podrás:
+
+### 🏗️ **Arquitectura**
+
+- Diseñar monolitos modulares
+- Implementar CQRS correctamente
+- Definir límites de módulos claros
+- Prevenir el "big ball of mud"
+
+### 🔧 **Herramientas**
+
+- Spring Modulith para modularidad
+- Zipkin para trazabilidad
+- Kafka para eventos externos
+- Docker para deployment
+
+### 🧪 **Buenas Prácticas**
+
+- Testing independiente de módulos
+- Automatización con Taskfile
+- Documentación automática
+- Observabilidad integrada
+
+### 🚀 **Productividad**
+
+- Setup de proyecto en minutos
+- Pipeline de desarrollo completo
+- Demo funcional desde el primer día
+
+## Enfoque del Taller
+
+### Aprendizaje Práctico
+
+- **Menos teoría, más código**
+- Cada concepto se implementa inmediatamente
+- Proyecto funcional al final
+
+### Explicaciones Claras
+
+- **¿Qué es?** - Definiciones simples
+- **¿Por qué?** - Problemas que resuelve
+- **¿Cómo?** - Implementación paso a paso
+- **¿Cuándo?** - Contexto de uso apropiado
+
+### Herramientas Modernas
+
+- Taskfile en lugar de scripts bash
+- TestContainers para testing real
+- Docker Compose para entorno completo
+
+## Resultados Esperados
+
+### Al Final del Workshop Tendrás:
+
+**✅ Aplicación Funcional**
+```bash
+task demo  # Inicia todo el entorno automáticamente
+```
+
+**✅ APIs Funcionando**
+
+- Crear productos: `POST /api/products`
+- Ver catálogo: `GET /api/products`
+- Agregar reviews: `POST /api/products/{id}/reviews`
+- Productos por rating: `GET /api/products/by-rating`
+
+**✅ Observabilidad Completa**
+
+- Aplicación: http://localhost:8080
+- Trazas: http://localhost:9411
+- Health checks: http://localhost:8080/actuator/health
+- Info de módulos: http://localhost:8080/actuator/modulith
+
+**✅ Arquitectura Validada**
+
+```bash
+task test:modulith  # Verifica reglas arquitectónicas
+# ✅ Sin violaciones de encapsulamiento
+# ✅ Sin dependencias circulares  
+# ✅ APIs públicas bien definidas
+```
+
+## Comparación: Antes vs Después
+
+### Desarrollo Tradicional
+
+```java
+// ❌ Código acoplado
 @Service
-public class ProductCommandService {
-    private final ProductRepository repository;
-    private final ApplicationEventPublisher publisher;
-    
-    @Transactional
-    public Long createProduct(ProductRequest request) {
-        Product product = new Product(
-            request.name(), request.description(), request.price());
-        Product saved = repository.save(product);
-        
-        // Publicar evento
-        publisher.publishEvent(new ProductCreatedEvent(
-            saved.getId(), saved.getName(), saved.getDescription(), 
-            saved.getPrice(), saved.getStock(), saved.getCategory()));
-        
-        return saved.getId();
-    }
+class ProductService {
+    @Autowired private OrderRepository orderRepo;     // ¿Por qué?
+    @Autowired private UserService userService;       // Acoplamiento
+    @Autowired private EmailService emailService;     // Responsabilidades mezcladas
 }
 ```
 
----
-
-## 8. Manejo de Eventos CQRS
+### Con Spring Modulith
 
 ```java
-// Query Side
+// ✅ Módulos independientes
 @Service
-public class ProductEventHandler {
-    private final ProductViewRepository viewRepository;
+class ProductService {
+    // Solo dependencias del dominio products
+    private final ProductRepository productRepository;
+    private final ApplicationEventPublisher eventPublisher;
     
-    @ApplicationModuleListener
-    public void on(ProductCreatedEvent event) {
-        ProductView view = new ProductView();
-        view.setId(event.id());
-        view.setName(event.name());
-        view.setDescription(event.description());
-        view.setPrice(event.price());
-        view.setStock(event.stock());
-        view.setCategory(event.category());
-        
-        viewRepository.save(view);
-    }
-    
-    @ApplicationModuleListener
-    public void on(ProductReviewEvent event) {
-        viewRepository.findById(event.productId()).ifPresent(view -> {
-            // Calcular nueva calificación promedio
-            double currentTotal = view.getAverageRating() * view.getReviewCount();
-            int newCount = view.getReviewCount() + 1;
-            double newAverage = (currentTotal + event.vote()) / newCount;
-            
-            // Actualizar vista desnormalizada
-            view.setReviewCount(newCount);
-            view.setAverageRating(newAverage);
-            
-            viewRepository.save(view);
-        });
-    }
+    // Comunicación vía eventos, no dependencias directas
+    eventPublisher.publishEvent(new ProductCreated(...));
 }
 ```
 
----
+## Para Quien es Este Workshop
 
-## 9. Modelos Optimizados para Cada Propósito
+### 👍 Ideal para:
 
-**Command Side (Optimizado para Escritura):**
-```java
-@Entity  
-@Table(name = "product")  
-public class Product {  
-    @Id @GeneratedValue
-    private Long id;  
-    private String name;  
-    private String description;  
-    private BigDecimal price;  
-    private Integer stock;  
-    private String category;  
-  
-    @OneToMany(mappedBy = "product")
-    private List<Review> reviews = new ArrayList<>();  
-}
+- **Desarrolladores Java** con experiencia en Spring Boot
+- **Arquitectos de software** evaluando alternativas a microservicios
+- **Tech leads** buscando mejorar estructura de monolitos existentes
+- **Equipos** que quieren modularidad sin complejidad distribuida
+
+### 👎 No recomendado para:
+
+- Principiantes en Spring Boot
+- Proyectos que ya son microservicios exitosos
+- Equipos con infrastructure muy limitada
+- Aplicaciones con un solo dominio muy simple
+
+## Recursos del Workshop
+
+### Código Fuente
+
+- Repository con todo el código
+- Commits por cada paso del workshop
+- Branches para cada parte
+
+### Documentación
+
+- Guías detalladas paso a paso
+- Diagramas de arquitectura generados automáticamente
+- Comandos de referencia rápida
+
+### Herramientas de Práctica
+
+```bash
+# Comandos principales que usaremos
+task                    # Ejecutar tests
+task dev               # Entorno de desarrollo  
+task demo              # Demo completo
+task docs              # Generar documentación
+task test:modulith     # Verificar arquitectura
 ```
 
-**Query Side (Optimizado para Lectura):**
-```java
-@Entity
-@Table(name = "product_views")  
-public class ProductView {  
-    @Id  
-    private Long id;  
-    private String name;  
-    private String description;  
-    private BigDecimal price;  
-    private Integer stock;  
-    private String category;  
-      
-    // Datos desnormalizados
-    private Double averageRating = 0.0;  
-    private Integer reviewCount = 0;  
-}
-```
+## Próximos Pasos Después del Workshop
+
+### Inmediatos
+
+1. **Experimentar** con más módulos (`orders`, `inventory`)
+2. **Aplicar** los conceptos en proyectos reales
+3. **Compartir** conocimientos con el equipo
+
+### A Mediano Plazo
+
+1. **Migrar** monolitos existentes gradualmente
+2. **Implementar** observabilidad en proyectos actuales
+3. **Evaluar** cuándo extraer módulos como microservicios
+
+### Recursos Adicionales
+
+- [Documentación oficial de Spring Modulith](https://docs.spring.io/spring-modulith/reference/index.html)
+- [Ejemplos y workshops](https://github.com/spring-projects/spring-modulith)
+- [Comunidad y discusiones](https://github.com/spring-projects/spring-modulith/discussions)
 
 ---
 
-## 10. Caso Práctico: E-commerce Modular
+## ¡Comencemos!
 
-[IMAGEN 10: Diagrama de BookStore Modulith con módulos]
+¿Listo para construir monolitos que no se conviertan en pesadillas?
 
-* **Aplicación demo: BookStore**
-  * Refactorización de monolito a arquitectura modular
+**[👉 Ir a Parte 1: Configuración y Primer Módulo](./parte1.md)**
 
-* **Módulos:**
-  * **Common:** Componentes compartidos
-  * **Catalog:** Gestión de productos (CQRS para catálogo)
-  * **Orders:** Gestión de pedidos
-  * **Inventory:** Control de stock
+### Estructura del Workshop
 
-* **Comunicación entre módulos:**
-  * API pública explícita
-  * Eventos de dominio
+1. **[Parte 1: Fundamentos](./parte1.md)** - Setup y primer módulo
+2. **[Parte 2: CQRS Completo](./parte2.md)** - Command, Query y Events  
+3. **[Parte 3: Observabilidad y Deploy](./parte3.md)** - Zipkin, Kafka y Docker
 
----
+### Información del Instructor
 
-## 11. Refactorizando hacia Módulos
+Este workshop está diseñado para ser autoconducido, pero si tienes preguntas:
 
-### Paso 1: Reorganización del Código
+- Revisa la documentación paso a paso en cada parte
+- Usa los comandos de verificación incluidos
+- El código final está disponible como referencia
 
-[IMAGEN 4: Estructura de directorios del proyecto en IDE]
-
-* **Package-by-feature en lugar de package-by-layer**
-  * Estructura:
-    ```
-    bookstore
-      |- config
-      |- common
-      |- catalog
-      |   - domain
-      |   - web
-      |- orders
-      |   - domain
-      |   - web
-      |- inventory
-    ```
-
-* **Visibilidad controlada:** Reducir uso de `public`
-
----
-
-## 12. Añadiendo Spring Modulith
-
-* **Dependencias Maven:**
-  ```xml
-  <dependency>
-    <groupId>org.springframework.modulith</groupId>
-    <artifactId>spring-modulith-starter-core</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.springframework.modulith</groupId>
-    <artifactId>spring-modulith-starter-test</artifactId>
-    <scope>test</scope>
-  </dependency>
-  ```
-
-* **Verificación de la estructura modular:**
-  ```java
-  @Test
-  void verifiesModularStructure() {
-      ApplicationModules.of(BookStoreApplication.class).verify();
-  }
-  ```
-
-[IMAGEN 5: Captura de pantalla mostrando módulos en la estructura de IntelliJ IDEA]
-
----
-
-## 13. Definición de Módulos
-
-[IMAGEN 6: Captura de violaciones de módulos en IDE]
-
-* **Configurando tipo de módulo:**
-
-```java
-@ApplicationModule(type = ApplicationModule.Type.OPEN)
-package com.sivalabs.bookstore.common;
-
-import org.springframework.modulith.ApplicationModule;
-```
-
-```java
-@ApplicationModule(allowedDependencies = {"catalog", "common"})
-package com.sivalabs.bookstore.orders;
-
-import org.springframework.modulith.ApplicationModule;
-```
-
-* **Definiendo NamedInterfaces:**
-
-```java
-@NamedInterface("order-models")
-package com.sivalabs.bookstore.orders.domain.models;
-
-import org.springframework.modulith.NamedInterface;
-```
-
----
-
-## 14. Implementando CQRS en el módulo Catálogo
-
-* **Separación de modelos:**
-
-```java
-// Modelo Command
-@Entity
-@Table(name = "products", schema = "catalog")
-public class ProductEntity {
-    @Id
-    private String code;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private String imageUrl;
-    // Campos optimizados para escritura
-}
-
-// Modelo Query
-@Entity
-@Table(name = "product_views", schema = "catalog_query")
-public class ProductView {
-    @Id
-    private String code;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private String imageUrl;
-    // Campos desnormalizados optimizados para lectura
-    private Double averageRating;
-    private Integer reviewCount;
-    private String categoryName;
-    private String tags;
-}
-```
-
----
-
-## 15. Definiendo APIs Públicas de Módulos
-
-[IMAGEN 8: Captura mostrando violación de dependencia de módulo]
-
-* **API explícita para Catálogo:**
-  ```java
-  @Service
-  public class CatalogApi {
-      private final ProductService productService;
-      
-      public Optional<Product> getByCode(String code) {
-          return productService.getByCode(code);
-      }
-  }
-  ```
-
-* **Evitar acceso directo a componentes internos:**
-  * OrderService debe usar CatalogApi, no ProductService
-
-[IMAGEN 9: Configuración de dependencias permitidas]
-
----
-
-## 16. Comunicación Basada en Eventos
-
-* **Publicación de eventos:**
-  ```java
-  @Service
-  class OrderService {
-      private final ApplicationEventPublisher publisher;
-  
-      @Transactional
-      void createOrder(CreateOrderRequest request) {
-          // Lógica de creación
-          OrderEntity order = // ...
-          
-          // Publicar evento
-          publisher.publishEvent(new OrderCreatedEvent(
-              order.getOrderId(),
-              order.getProductCode(),
-              order.getQuantity(),
-              order.getCustomer()
-          ));
-      }
-  }
-  ```
-
----
-
-## 17. Manejo de Eventos
-
-* **Escucha de eventos con Spring Modulith:**
-  ```java
-  @Component
-  class OrderCreatedEventHandler {
-      private final InventoryService inventoryService;
-      
-      @ApplicationModuleListener
-      void handle(OrderCreatedEvent event) {
-          log.info("Procesando pedido: {}", event.orderNumber());
-          
-          // Actualizar inventario
-          inventoryService.updateStock(
-              event.productCode(), 
-              -event.quantity()
-          );
-      }
-  }
-  ```
-
-* **@ApplicationModuleListener combina:**
-  * `@Async`
-  * `@Transactional(propagation = Propagation.REQUIRES_NEW)`
-  * `@TransactionalEventListener`
-
----
-
-## 18. Persistencia de Eventos
-
-* **Event Publication Registry:**
-  ```xml
-  <dependency>
-    <groupId>org.springframework.modulith</groupId>
-    <artifactId>spring-modulith-starter-jdbc</artifactId>
-  </dependency>
-  ```
-
-  ```properties
-  spring.modulith.events.jdbc.schema-initialization.enabled=true
-  spring.modulith.events.completion-mode=update
-  spring.modulith.events.republish-outstanding-events-on-restart=true
-  ```
-
-* **Beneficios:**
-  * Resiliencia ante fallos
-  * Auditoría de eventos
-  * Garantía de entrega
-
----
-
-## 19. Externalización de Eventos
-
-* **Integración con sistemas de mensajería:**
-  ```xml
-  <dependency>
-    <groupId>org.springframework.modulith</groupId>
-    <artifactId>spring-modulith-events-amqp</artifactId>
-  </dependency>
-  ```
-
-  ```java
-  @Externalized("BookStoreExchange::orders.new")
-  public record OrderCreatedEvent(
-      String orderNumber,
-      String productCode,
-      int quantity,
-      Customer customer
-  ) {}
-  ```
-
----
-
-## 20. Testing de Módulos Aislados
-
-* **@ApplicationModuleTest:**
-  ```java
-  @ApplicationModuleTest(webEnvironment = RANDOM_PORT)
-  @Import(TestcontainersConfiguration.class)
-  @AutoConfigureMockMvc
-  class OrderRestControllerTests {
-      @MockitoBean
-      CatalogApi catalogApi;
-      
-      @BeforeEach
-      void setUp() {
-          Product product = new Product("P100", "The Hunger Games", "", 
-                  null, new BigDecimal("34.0"));
-          given(catalogApi.getByCode("P100")).willReturn(Optional.of(product));
-      }
-      
-      // Pruebas independientes del módulo Orders
-  }
-  ```
-
----
-
-## 21. Verificación de Eventos
-
-* **Testing de publicación de eventos:**
-  ```java
-  @Test
-  void shouldCreateOrderSuccessfully(AssertablePublishedEvents events) {
-      MvcTestResult testResult = mockMvcTester.post().uri("/api/orders")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content("""
-                      {
-                          "productCode": "P100",
-                          "quantity": 2,
-                          "customer": {
-                              "name": "Siva",
-                              "email": "siva123@gmail.com",
-                              "phone": "9987654"
-                          }
-                      }
-                      """)
-              .exchange();
-      assertThat(testResult).hasStatus(HttpStatus.CREATED);
-
-      // Verificar publicación del evento
-      assertThat(events)
-              .contains(OrderCreatedEvent.class)
-              .matching(e -> e.customer().email(), "siva123@gmail.com")
-              .matching(OrderCreatedEvent::productCode, "P100");
-  }
-  ```
-
----
-
-## 22. Testing de Manejadores de Eventos
-
-* **Pruebas de integración para eventos:**
-
-```java
-@ApplicationModuleTest
-@Import(TestcontainersConfiguration.class)
-class InventoryIntegrationTests {
-    @Autowired
-    private InventoryService inventoryService;
-    
-    @Test
-    void handleOrderCreatedEvent(Scenario scenario) {
-        var productCode = "P114";
-        var customer = new Customer("Siva", "siva@gmail.com", "9987654");
-        var event = new OrderCreatedEvent(UUID.randomUUID().toString(), 
-                productCode, 2, customer);
-
-        scenario.publish(event)
-                .andWaitForStateChange(() -> 
-                    inventoryService.getStockLevel(productCode) == 598)
-                .andVerify(result -> assertThat(result).isTrue());
-    }
-}
-```
-
----
-
-## 23. Documentación Automática
-
-* **Generación de documentación C4:**
-  ```java
-  @Test
-  void verifiesModularStructure() {
-      modules.verify();
-      new Documenter(modules).writeDocumentation();
-  }
-  ```
-
-* **Resultado:**
-  * Diagramas automáticos de la estructura modular
-  * Documentación de dependencias entre módulos
-  * Generados en `target/spring-modulith-docs`
-
----
-
-## 24. Mejores Prácticas
-
-[IMAGEN 11: Diagrama mostrando módulos con APIs y componentes internos]
-
-* **Diseño de módulos:**
-  * Cohesión alta, acoplamiento bajo
-  * Diseñar interfaces públicas cuidadosamente
-  * Evitar dependencias circulares
-
-* **Comunicación entre módulos:**
-  * Preferir eventos para comunicación asíncrona
-  * API explícita para operaciones síncronas
-  * Evitar accesos directos a componentes internos
-
-* **CQRS como implementación interna:**
-  * Modelar módulos por capacidades de negocio, no por concerns técnicos
-  * CQRS como detalle de implementación dentro del módulo
-  * Separar modelos de lectura/escritura donde aporte valor real
-
----
-
-## 25. Antipatrones a Evitar
-
-* **Módulos demasiado acoplados**
-* **Dependencias circulares**
-* **Módulos con responsabilidades mixtas**
-* **Exposición excesiva de detalles internos**
-* **Estructurar módulos por aspectos técnicos en lugar de por dominio**
-* **Uso excesivo de clases públicas**
-* **CQRS innecesariamente complejo para casos simples**
-
----
-
-## 26. Conclusiones
-
-[IMAGEN 10: Diagrama de BookStore Modulith con módulos]
-
-* **Arquitectura modular con Spring Boot:**
-  * Mantiene ventajas del monolito
-  * Resuelve problemas de acoplamiento
-  * Facilita evolución y mantenimiento
-
-* **CQRS:**
-  * Rendimiento optimizado para cada caso de uso
-  * Separación clara de responsabilidades
-
-* **Spring Modulith:**
-  * Herramienta perfecta para monolitos modulares
-  * Verificación automática de reglas arquitectónicas
-  * Comunicación robusta basada en eventos
-
----
-
-## 27. Recursos
-
-* GitHub: [https://github.com/sivaprasadreddy/spring-modulith-workshop](https://github.com/sivaprasadreddy/spring-modulith-workshop)
-* CQRS con Spring Modulith: [https://github.com/odrotbohm/cqrs-spring-modulith](https://github.com/odrotbohm/cqrs-spring-modulith)
-* Blog: [https://spring.io/blog/2022/10/21/introducing-spring-modulith](https://spring.io/blog/2022/10/21/introducing-spring-modulith)
-
----
-
-## ¡Gracias!
-
-**Preguntas y Respuestas**
+**¡Que disfrutes construyendo arquitecturas limpias y mantenibles!**
