@@ -1,11 +1,211 @@
-# Guía CQRS Spring Modulith - Parte 2: Implementación Detallada
+# Guía CQRS Spring Modulith - Parte 2: Implementación Completa
 
-## 5. ProductRepository - La Puerta de Acceso a la Base de Datos
+## Continuando desde la Parte 1
+
+En la Parte 1 configuramos la base del proyecto. Ahora vamos a implementar completamente el patrón CQRS con Spring Modulith, paso a paso.
+
+## Tabla de Contenidos - Parte 2
+1. [Implementando las Entidades del Lado Command](#implementando-las-entidades-del-lado-command)
+2. [ProductRepository - La Puerta de Acceso a la Base de Datos](#productrepository---la-puerta-de-acceso-a-la-base-de-datos)
+3. [ProductCommandService - El Cerebro de las Operaciones](#productcommandservice---el-cerebro-de-las-operaciones)
+4. [ProductCommandController - La Puerta de Entrada HTTP](#productcommandcontroller---la-puerta-de-entrada-http)
+5. [Lado Query - Modelos Optimizados para Lectura](#lado-query---modelos-optimizados-para-lectura)
+6. [ProductEventHandler - Sincronización Asíncrona](#producteventhandler---sincronización-asíncrona)
+7. [Repository de Query - Consultas Optimizadas](#repository-de-query---consultas-optimizadas)
+8. [Controller de Query - APIs de Lectura](#controller-de-query---apis-de-lectura)
+9. [Testing Independiente de Módulos](#testing-independiente-de-módulos)
+10. [Próximos Pasos y Mejoras](#próximos-pasos-y-mejoras)
+
+## Implementando las Entidades del Lado Command
+
+Antes de comenzar con los repositories y services, necesitamos crear las entidades básicas. Empezaremos por las clases que faltaban de la Parte 1.
+
+### Paso 1: Crear las Entidades de Comando
+
+Crea `src/main/java/com/example/store/products/command/Product.java`:
+
+```java
+// src/main/java/com/example/store/products/command/Product.java
+package com.example.store.products.command;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.jmolecules.ddd.types.AggregateRoot;
+import org.jmolecules.ddd.types.Identifier;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Agregado Product del lado Command.
+ * Optimizado para mantener consistencia e integridad de datos.
+ */
+@Getter
+@Setter
+public class Product implements AggregateRoot<Product, Product.ProductIdentifier> {
+    
+    private ProductIdentifier id;
+    private String name;
+    private String description;
+    private String category;
+    private BigDecimal price;
+    private Integer stock;
+    private List<Review> productReviews = new ArrayList<>();
+    
+    public Product() {
+        this.id = new ProductIdentifier(UUID.randomUUID());
+    }
+    
+    /**
+     * Agregar un review al producto.
+     * Mantiene la consistencia del agregado.
+     */
+    public Product add(Review review) {
+        if (review == null) {
+            throw new IllegalArgumentException("Review cannot be null");
+        }
+        this.productReviews.add(review);
+        return this;
+    }
+    
+    /**
+     * Value Object para el identificador del producto.
+     */
+    public record ProductIdentifier(UUID id) implements Identifier {
+        public ProductIdentifier {
+            if (id == null) {
+                throw new IllegalArgumentException("Product ID cannot be null");
+            }
+        }
+    }
+}
+```
+
+Crea `src/main/java/com/example/store/products/command/Review.java`:
+
+```java
+// src/main/java/com/example/store/products/command/Review.java
+package com.example.store.products.command;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.jmolecules.ddd.types.Entity;
+
+import java.util.UUID;
+
+/**
+ * Entidad Review dentro del agregado Product.
+ */
+@Getter
+@Setter
+public class Review implements Entity<Product, ReviewIdentifier> {
+    
+    private ReviewIdentifier id;
+    private Integer vote;
+    private String comment;
+    private String author;
+    
+    public Review() {
+        this.id = new ReviewIdentifier(UUID.randomUUID());
+    }
+    
+    /**
+     * Validar que el voto esté en rango válido.
+     */
+    public void setVote(Integer vote) {
+        if (vote == null || vote < 1 || vote > 5) {
+            throw new IllegalArgumentException("Vote must be between 1 and 5");
+        }
+        this.vote = vote;
+    }
+}
+```
+
+Crea `src/main/java/com/example/store/products/command/ReviewIdentifier.java`:
+
+```java
+// src/main/java/com/example/store/products/command/ReviewIdentifier.java
+package com.example.store.products.command;
+
+import org.jmolecules.ddd.types.Identifier;
+
+import java.util.UUID;
+
+/**
+ * Value Object para identificar reviews.
+ */
+public record ReviewIdentifier(UUID id) implements Identifier {
+    public ReviewIdentifier {
+        if (id == null) {
+            throw new IllegalArgumentException("Review ID cannot be null");
+        }
+    }
+}
+```
+
+### Paso 2: Crear los Eventos de Dominio
+
+Crea `src/main/java/com/example/store/products/command/ProductEvents.java`:
+
+```java
+// src/main/java/com/example/store/products/command/ProductEvents.java
+package com.example.store.products.command;
+
+import com.example.store.products.command.Product.ProductIdentifier;
+import org.jmolecules.event.types.DomainEvent;
+
+import java.math.BigDecimal;
+
+/**
+ * Eventos de dominio del módulo Products.
+ * Permiten comunicación asíncrona entre módulos.
+ */
+public class ProductEvents {
+    
+    /**
+     * Evento publicado cuando se crea un producto.
+     */
+    public record ProductCreated(
+        ProductIdentifier id,
+        String name,
+        String description,
+        BigDecimal price,
+        Integer stock,
+        String category
+    ) implements DomainEvent {}
+    
+    /**
+     * Evento publicado cuando se actualiza un producto.
+     */
+    public record ProductUpdated(
+        ProductIdentifier id,
+        String name,
+        String description,
+        BigDecimal price,
+        Integer stock,
+        String category
+    ) implements DomainEvent {}
+    
+    /**
+     * Evento publicado cuando se agrega un review.
+     */
+    public record ProductReviewed(
+        ProductIdentifier productId,
+        ReviewIdentifier reviewId,
+        Integer vote,
+        String comment
+    ) implements DomainEvent {}
+}
+```
+
+## ProductRepository - La Puerta de Acceso a la Base de Datos
 
 ### ¿Qué es un Repository?
 
-**Definición simple**: Una "caja" que guarda y busca objetos en la base de datos
-**Analogía**: Como un archivero - puedes guardar documentos y buscarlos después
+**Definición simple**: Una "caja" que guarda y busca objetos en la base de datos  
+**Analogía**: Como un archivero - puedes guardar documentos y buscarlos después  
 **En código**: Provides métodos como `save()`, `findById()`, `findAll()`
 
 ### ¿Por qué crear una interface en lugar de una clase?
@@ -63,12 +263,12 @@ interface ProductRepository extends CrudRepository<Product, ProductIdentifier> {
 - Usa el driver de PostgreSQL que agregamos en `pom.xml`
 - Genera automáticamente el SQL necesario
 
-## 6. ProductCommandService - El Cerebro de las Operaciones
+## ProductCommandService - El Cerebro de las Operaciones
 
 ### ¿Qué hace un Service?
 
-**Definición simple**: Contiene la lógica de negocio
-**Ejemplo**: "Para crear un producto, validar datos + guardar + notificar"
+**Definición simple**: Contiene la lógica de negocio  
+**Ejemplo**: "Para crear un producto, validar datos + guardar + notificar"  
 **Regla**: Los Controllers son delgados, los Services contienen la lógica
 
 ### Conceptos importantes que vamos a usar:
@@ -235,8 +435,8 @@ class ProductCommandService {
      */
     Review addReview(ProductIdentifier productId, Integer vote, String comment) {
         // Validación de negocio a nivel de servicio
-        if (vote < 0 || vote > 5) {
-            throw new IllegalArgumentException("Vote must be between 0 and 5");
+        if (vote < 1 || vote > 5) {
+            throw new IllegalArgumentException("Vote must be between 1 and 5");
         }
         
         // Crear el review
@@ -267,18 +467,18 @@ class ProductCommandService {
 3. **Con persistencia**: Si falla, Spring Modulith puede reintentar después
 4. **Sin bloquear**: Tu método continúa normalmente
 
-## 7. ProductCommandController - La Puerta de Entrada HTTP
+## ProductCommandController - La Puerta de Entrada HTTP
 
 ### ¿Qué hace un Controller?
 
-**Definición simple**: Recibe peticiones HTTP y devuelve respuestas HTTP
-**Responsabilidad**: Ser la "cara" de tu aplicación hacia el mundo exterior
+**Definición simple**: Recibe peticiones HTTP y devuelve respuestas HTTP  
+**Responsabilidad**: Ser la "cara" de tu aplicación hacia el mundo exterior  
 **Regla**: Delgado - solo convierte HTTP a llamadas de servicio
 
 ### Conceptos importantes:
 
 #### ¿Qué son los DTOs (Data Transfer Objects)?
-**Definición simple**: Objetos que transportan datos entre capas
+**Definición simple**: Objetos que transportan datos entre capas  
 **¿Por qué como records internos?**: Son simples, inmutables y no necesitan archivo separado
 
 #### ¿Qué códigos HTTP usar?
@@ -378,13 +578,13 @@ class ProductCommandController {
      * - PUT es para actualizar recursos existentes
      */
     @PostMapping("/{id}/reviews")
-    ResponseEntity<ReviewIdentifier> addReview(@PathVariable ProductIdentifier productIdentifier,
+    ResponseEntity<ReviewIdentifier> addReview(@PathVariable ProductIdentifier id,
                                              @RequestBody AddReviewRequest request) {
-        var review = commandService.addReview(productIdentifier, request.vote(), request.comment());
+        var review = commandService.addReview(id, request.vote(), request.comment());
         var reviewId = review.getId();
         
         return ResponseEntity
-            .created(URI.create("/api/products/" + productIdentifier.id() + "/reviews/" + reviewId.id()))
+            .created(URI.create("/api/products/" + id.id() + "/reviews/" + reviewId.id()))
             .body(reviewId);
     }
     
@@ -449,12 +649,12 @@ class ProductCommandController {
 4. **Llama método** → `createProduct(request)`
 5. **Convierte respuesta** → De `ResponseEntity` a HTTP
 
-## 8. Lado Query - Modelos Optimizados para Lectura
+## Lado Query - Modelos Optimizados para Lectura
 
 ### ¿Qué es el lado Query en CQRS?
 
-**Definición simple**: La parte que se especializa en leer datos rápidamente
-**Diferencia con Command**: Optimizada para consultas, no para mantener consistencia
+**Definición simple**: La parte que se especializa en leer datos rápidamente  
+**Diferencia con Command**: Optimizada para consultas, no para mantener consistencia  
 **Características**: Datos desnormalizados, sin validaciones complejas, solo lectura
 
 ### ProductView - El Modelo de Lectura
@@ -528,8 +728,11 @@ class ProductView implements AggregateRoot<ProductView, ProductIdentifier> {
     
     // Campos desnormalizados para consultas eficientes
     // @Setter(AccessLevel.NONE) = solo se pueden cambiar con métodos específicos
-    private @Setter(AccessLevel.NONE) Double averageRating = 0.0;
-    private @Setter(AccessLevel.NONE) Integer reviewCount = 0;
+    @Setter(AccessLevel.NONE) 
+    private Double averageRating = 0.0;
+    
+    @Setter(AccessLevel.NONE) 
+    private Integer reviewCount = 0;
     
     /**
      * Procesa un evento ProductReviewed para actualizar estadísticas.
@@ -560,9 +763,9 @@ class ProductView implements AggregateRoot<ProductView, ProductIdentifier> {
 }
 ```
 
-### ProductEventHandler - Sincronización Asíncrona
+## ProductEventHandler - Sincronización Asíncrona
 
-#### ¿Qué es @ApplicationModuleListener?
+### ¿Qué es @ApplicationModuleListener?
 
 **Definición simple**: Escucha eventos de otros módulos y reacciona asíncronamente
 
@@ -688,7 +891,7 @@ class ProductEventHandler {
 3. **Puedes configurar retry** con backoff exponencial
 4. **Eventos archivados** van a `event_publication_archive` para auditoría
 
-## 9. Repository de Query - Consultas Optimizadas
+## Repository de Query - Consultas Optimizadas
 
 ### ¿Por qué métodos de query específicos?
 
@@ -740,7 +943,7 @@ interface ProductViewRepository extends ListCrudRepository<ProductView, ProductI
      * - "findBy" + "Category" = WHERE category = ?
      * - Genera automáticamente: SELECT * FROM product_view WHERE category = ?
      */
-    List<ProductView> findByCategory(String categoryName);
+    List<ProductView> findByCategory(String category);
     
     /**
      * Encuentra productos dentro de rango de precios.
@@ -771,7 +974,7 @@ interface ProductViewRepository extends ListCrudRepository<ProductView, ProductI
 }
 ```
 
-## 10. Controller de Query - APIs de Lectura
+## Controller de Query - APIs de Lectura
 
 ### Implementación del Controller de Query
 
@@ -871,7 +1074,7 @@ class ProductViewController {
 }
 ```
 
-## 11. Testing Independiente de Módulos
+## Testing Independiente de Módulos
 
 ### ¿Por qué Testing Independiente?
 
@@ -906,7 +1109,7 @@ class ProductTest {
 - **Tests más rápidos** que @SpringBootTest completo
 
 #### ¿Qué es TestContainers?
-**Definición simple**: Levanta una base de datos PostgreSQL real para cada test
+**Definición simple**: Levanta una base de datos PostgreSQL real para cada test  
 **¿Por qué no H2 en memoria?**: PostgreSQL en test = PostgreSQL en producción (más confiable)
 
 #### ¿Qué es PublishedEvents?
@@ -951,7 +1154,7 @@ import java.util.UUID;
  */
 @ApplicationModuleTest
 @RequiredArgsConstructor
-public class ProductCommandServiceTest {
+class ProductCommandServiceTest {
     
     // Spring inyecta estas dependencias automáticamente
     private final ProductCommandService productCommandService;
@@ -1211,153 +1414,23 @@ class ProductsModuleIntegrationTests {
 }
 ```
 
-### ¿Cómo funciona TestContainers automáticamente?
-
-Cuando ejecutas `@ApplicationModuleTest`, Spring Modulith realiza la siguiente secuencia automáticamente:
-
-#### 1. Detección Automática de Base de Datos
-```yaml
-# Spring lee tu application.yml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/store_db  # Ve que usas PostgreSQL
-    driver-class-name: org.postgresql.Driver         # Confirma el driver
-```
-
-#### 2. Levantamiento de Contenedor
-- **Detecta**: "Ah, esta aplicación usa PostgreSQL"
-- **Descarga**: Imagen `postgres:15-alpine` si no existe
-- **Levanta**: Contenedor Docker con PostgreSQL
-- **Configura**: Puerto aleatorio para evitar conflictos
-
-#### 3. Configuración Dinámica
-```java
-// Spring cambia automáticamente la configuración:
-// De: jdbc:postgresql://localhost:5432/store_db
-// A:  jdbc:postgresql://localhost:49153/test (puerto dinámico)
-```
-
-#### 4. Inicialización de Schema
-- **Ejecuta**: Migraciones de Flyway automáticamente
-- **Carga**: Scripts desde `src/main/resources/db/migration/`
-- **Inserta**: Datos de ejemplo para testing
-
-#### 5. Ejecución del Test
-```java
-@Test
-void myTest() {
-    // En este punto:
-    // - PostgreSQL está corriendo en un contenedor
-    // - Schema está creado con Flyway
-    // - Datos de ejemplo están cargados
-    // - La aplicación está conectada a la BD de test
-}
-```
-
-#### 6. Limpieza Automática
-- **Al finalizar**: Destruye el contenedor automáticamente
-- **Sin rastros**: No quedan procesos ni datos
-- **Aislamiento**: Cada test tiene su propia BD limpia
-
-### Ventajas de Este Enfoque
-
-#### ✅ **Testing con BD Real**
-```java
-// ❌ Con H2 en memoria
-@Test 
-void testWithH2() {
-    // Usa H2, no PostgreSQL
-    // Dialectos SQL diferentes
-    // Comportamiento puede diferir
-}
-
-// ✅ Con TestContainers
-@Test
-void testWithPostgreSQL() {
-    // Usa PostgreSQL real
-    // Mismo motor que producción
-    // Resultados confiables
-}
-```
-
-#### ✅ **Aislamiento Perfecto**
-```java
-@Test
-void test1() {
-    // Contenedor 1: puerto 49152
-    // BD limpia y vacía
-}
-
-@Test  
-void test2() {
-    // Contenedor 2: puerto 49153  
-    // BD limpia y vacía
-    // No interferencia con test1
-}
-```
-
-#### ✅ **Sin Configuración Manual**
-- No necesitas instalar PostgreSQL localmente
-- No necesitas configurar puertos
-- No necesitas limpiar datos entre tests
-- Todo es automático y transparente
-
 ### Comandos de Testing Útiles
 
 ```bash
 # Ejecutar solo tests del módulo products
-mvn test -Dtest="com.example.store.products.**"
+./mvnw test -Dtest="com.example.store.products.**"
 
 # Ejecutar solo tests de command
-mvn test -Dtest="*CommandServiceTest"
+./mvnw test -Dtest="*CommandServiceTest"
 
 # Ejecutar con logs de SQL para debugging
-mvn test -Dtest=ProductCommandServiceTest -Dspring.jpa.show-sql=true
+./mvnw test -Dtest=ProductCommandServiceTest -Dspring.jpa.show-sql=true
 
 # Ver qué contenedores están corriendo durante tests
 docker ps  # (ejecutar en otra terminal mientras corre el test)
 ```
 
-### Tips para Testing Efectivo
-
-#### 1. **Usar datos de ejemplo consistentes**
-```java
-// ✅ Reutilizar IDs de V1__create_initial_schema.sql
-UUID LAPTOP_ID = UUID.fromString("f47ac10b-58cc-4372-a567-0e02b2c3d479");
-
-// ❌ Generar IDs aleatorios cada vez
-UUID randomId = UUID.randomUUID(); // Impredecible
-```
-
-#### 2. **Verificar tanto estado como eventos**
-```java
-@Test
-void testCompleteFlow(PublishedEvents events) {
-    // Act
-    var id = service.createProduct(...);
-    
-    // Assert: Estado en BD
-    assertThat(repository.findById(id)).isPresent();
-    
-    // Assert: Evento publicado
-    assertThat(events.ofType(ProductCreated.class)).hasSize(1);
-}
-```
-
-#### 3. **Usar AssertJ para mejor legibilidad**
-```java
-// ✅ Expresivo y claro
-assertThat(product).satisfies(p -> {
-    assertThat(p.getName()).isEqualTo("Laptop Pro");
-    assertThat(p.getPrice()).isGreaterThan(BigDecimal.ZERO);
-});
-
-// ❌ Verboso y difícil de leer
-assertEquals("Laptop Pro", product.getName());
-assertTrue(product.getPrice().compareTo(BigDecimal.ZERO) > 0);
-```
-
-## 12. Próximos Pasos y Mejoras
+## Próximos Pasos y Mejoras
 
 ### Funcionalidades Adicionales que Puedes Implementar
 
@@ -1420,62 +1493,29 @@ List<ProductSummary> findProductSummaries();
 #### 3. **Paginación para Listas Grandes**
 ```java
 @GetMapping
-Page<ProductView> getAllProducts(Pageable pageable) {
-    return repository.findAll(pageable);
+PagedResult<ProductView> getAllProducts(Pageable pageable) {
+    var page = repository.findAll(pageable);
+    return PagedResult.of(page.getContent(), page.getNumber(), 
+                         page.getSize(), page.getTotalElements());
 }
 ```
 
-### Monitoreo y Observabilidad
+### ¿Qué Hemos Logrado en la Parte 2?
 
-#### 1. **Métricas de Eventos**
-```java
-@Component
-class EventMetrics {
-    private final MeterRegistry meterRegistry;
-    
-    @ApplicationModuleListener
-    void on(ProductCreated event) {
-        meterRegistry.counter("products.created", "category", event.category()).increment();
-    }
-}
-```
+✅ **Implementación completa de CQRS** con separación clara de comandos y queries  
+✅ **Comunicación asíncrona** entre módulos vía eventos  
+✅ **Modelos optimizados** para escritura y lectura  
+✅ **Testing independiente** de módulos con TestContainers  
+✅ **APIs REST funcionales** para ambos lados  
+✅ **Manejo de eventos** con retry automático
 
-#### 2. **Health Checks Personalizados**
-```java
-@Component
-class ProductsHealthIndicator implements HealthIndicator {
-    @Override
-    public Health health() {
-        long count = productRepository.count();
-        return count > 0 ? Health.up() : Health.down();
-    }
-}
-```
+### Preparándose para la Parte 3
 
-### Migración a Microservicios (Cuando Sea Necesario)
+En la **Parte 3** completaremos el workshop con:
+- **Monitoreo y observabilidad** del sistema
+- **Performance tuning** y optimizaciones avanzadas
+- **Deployment** con Docker y Docker Compose
+- **Migración gradual** a microservicios cuando sea necesario
+- **Best practices** para producción
 
-#### 1. **Identificar Bounded Contexts**
-- Cuando un módulo crece demasiado
-- Cuando necesita escalar independientemente
-- Cuando tiene equipos separados
-
-#### 2. **Extraer Módulo a Servicio**
-```java
-// 1. Crear nuevo proyecto Spring Boot
-// 2. Copiar el módulo completo
-// 3. Cambiar eventos por HTTP/messaging
-// 4. Migrar datos gradualmente
-```
-
-### Conclusión
-
-Has aprendido a implementar CQRS con Spring Modulith desde cero, incluyendo:
-
-- **Separación clara** entre comandos y queries
-- **Comunicación asíncrona** vía eventos
-- **Testing independiente** de módulos
-- **Arquitectura modular** sin complejidad de microservicios
-
-Esta base te permite **evolucionar gradualmente** hacia microservicios cuando realmente los necesites, no por moda tecnológica.
-
-**Recuerda**: La mejor arquitectura es la que resuelve tus problemas reales con la menor complejidad posible.
+Tu implementación CQRS está funcionando correctamente. ¡Listo para la parte final!
