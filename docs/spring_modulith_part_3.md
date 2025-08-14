@@ -1,13 +1,19 @@
 # Guía CQRS Spring Modulith - Parte 3: Observabilidad y Deployment
 
-## Tabla de Contenidos
+## Continuando desde la Parte 2
+
+En la Parte 2 implementamos completamente el patrón CQRS con Spring Modulith. Ahora vamos a agregar observabilidad, automatización y deployment para tener un sistema completo listo para producción.
+
+## Tabla de Contenidos - Parte 3
 1. [Observabilidad con Zipkin](#observabilidad-con-zipkin)
 2. [Automatización con Taskfile](#automatización-con-taskfile)
 3. [Eventos Externos con Kafka](#eventos-externos-con-kafka)
-4. [Deployment con Docker](#deployment-con-docker)
-5. [Demo Final](#demo-final)
+4. [Testing de Integración Avanzado](#testing-de-integración-avanzado)
+5. [Deployment con Docker](#deployment-con-docker)
+6. [Demo Final](#demo-final)
+7. [Conclusión del Workshop](#conclusión-del-workshop)
 
-## 12. Observabilidad con Zipkin
+## Observabilidad con Zipkin
 
 ### ¿Qué es Observabilidad?
 
@@ -102,11 +108,13 @@ Trace: "POST /products + POST /reviews"
 
 ### Configuración de Trazabilidad
 
-#### 1. ¿Qué Dependencias Necesitamos y Por Qué?
+#### Paso 1: Agregar Dependencias de Observabilidad
 
 ```xml
-<!-- pom.xml - Cada dependencia explicada -->
+<!-- pom.xml - Agregar estas dependencias para observabilidad -->
 <dependencies>
+    <!-- Las dependencias existentes... -->
+    
     <!-- 
     ¿Qué es? Puente entre Spring y Brave (biblioteca de tracing)
     ¿Para qué? Permite que Spring Boot genere automáticamente trazas
@@ -139,10 +147,10 @@ Trace: "POST /products + POST /reviews"
 </dependencies>
 ```
 
-#### 2. Configuración Explicada
+#### Paso 2: Configuración Explicada
 
 ```yaml
-# src/main/resources/application.yml
+# src/main/resources/application.yml - Agregar configuración de observabilidad
 management:
   endpoints:
     web:
@@ -212,7 +220,7 @@ curl http://localhost:8080/actuator/modulith
 - **Validación de arquitectura**: Detectar violaciones
 - **Onboarding de nuevos desarrolladores**: Entender la estructura
 
-## 13. Automatización con Taskfile
+## Automatización con Taskfile
 
 ### ¿Qué es Taskfile?
 
@@ -283,10 +291,12 @@ test:
     - "{{.MVNW}} clean verify"
 ```
 
-### ¿Qué Hace Cada Tarea del Taskfile?
+### Implementación del Taskfile
+
+Crea `Taskfile.yml` en la raíz del proyecto:
 
 ```yaml
-# Taskfile.yml explicado
+# Taskfile.yml
 version: '3'
 
 # Variables globales - Reutilizables en todo el archivo
@@ -341,7 +351,7 @@ tasks:
     # ¿Por qué? Documentación siempre actualizada automáticamente
     desc: "Genera documentación de módulos"
     cmds:
-      - "{{.MVNW}} test -Dtest=ModulithStructureTest"
+      - "{{.MVNW}} test -Dtest=ModularityTest"
       - echo "📚 Documentación generada en target/spring-modulith-docs/"
 
   # =====================================
@@ -393,6 +403,17 @@ tasks:
         timeout 30 sh -c 'until docker compose -f {{.DC_DIR}}/docker-compose.yml exec -T kafka kafka-topics.sh --bootstrap-server localhost:9092 --list; do sleep 1; done'
     silent: true
 
+  infra:stop:
+    desc: "Detiene todos los servicios"
+    cmds:
+      - docker compose -f "{{.DC_DIR}}/docker-compose.yml" down
+
+  infra:clean:
+    desc: "Detiene servicios y limpia volúmenes"
+    cmds:
+      - docker compose -f "{{.DC_DIR}}/docker-compose.yml" down -v
+      - docker system prune -f
+
   # =====================================
   # DESARROLLO LOCAL
   # =====================================
@@ -406,6 +427,34 @@ tasks:
       - echo "🔧 Entorno listo. Ejecuta: {{.MVNW}} spring-boot:run"
       - echo "📊 Zipkin: http://localhost:9411"
       - echo "🐘 PostgreSQL: localhost:5432"
+      - echo "📡 Kafka: localhost:9092"
+
+  # =====================================
+  # DEMO COMPLETO
+  # =====================================
+  
+  demo:
+    desc: "Demo completo con todos los servicios"
+    cmds:
+      - task: build:image
+      - docker compose -f "{{.DC_DIR}}/docker-compose.yml" up -d
+      - task: infra:wait
+      - echo "🎉 Demo listo!"
+      - echo "🌐 Aplicación: http://localhost:8080"
+      - echo "❤️ Health Check: http://localhost:8080/actuator/health"
+      - echo "🗂️ Módulos: http://localhost:8080/actuator/modulith"
+      - echo "📊 Zipkin: http://localhost:9411"
+
+  demo:stop:
+    desc: "Detiene el demo"
+    cmds:
+      - docker compose -f "{{.DC_DIR}}/docker-compose.yml" down
+
+  demo:clean:
+    desc: "Limpia completamente el demo"
+    cmds:
+      - docker compose -f "{{.DC_DIR}}/docker-compose.yml" down -v
+      - docker image rm {{.APP_NAME}}:latest || true
 ```
 
 ### ¿Cómo se Usa en la Práctica?
@@ -421,7 +470,7 @@ task infra:start       # Solo servicios base
 task demo              # Demo completo
 ```
 
-## 14. Eventos Externos con Kafka
+## Eventos Externos con Kafka
 
 ### ¿Qué es Kafka?
 
@@ -512,10 +561,10 @@ Tópico: "products.created"
 
 ### Configuración de Kafka
 
-#### 1. ¿Qué Dependencias Necesitamos?
+#### Paso 1: Agregar Dependencias de Kafka
 
 ```xml
-<!-- pom.xml -->
+<!-- pom.xml - Agregar dependencias de Kafka -->
 <dependency>
     <!-- ¿Qué es? Cliente oficial de Kafka para Spring -->
     <!-- ¿Para qué? Enviar y recibir mensajes de Kafka -->
@@ -530,14 +579,13 @@ Tópico: "products.created"
     <!-- ¿Sin esto? Tendrías que publicar manualmente a Kafka -->
     <groupId>org.springframework.modulith</groupId>
     <artifactId>spring-modulith-events-kafka</artifactId>
-    <version>${spring-modulith.version}</version>
 </dependency>
 ```
 
-#### 2. Configuración Explicada
+#### Paso 2: Configuración Explicada
 
 ```yaml
-# application.yml
+# application.yml - Agregar configuración de Kafka
 spring:
   kafka:
     # ¿Qué es? Dirección del cluster de Kafka
@@ -577,7 +625,7 @@ spring:
         enabled: true
 ```
 
-#### 3. ¿Cómo Configurar Qué Eventos Van a Kafka?
+#### Paso 3: Configurar Qué Eventos Van a Kafka
 
 ```java
 // src/main/java/com/example/store/config/EventsConfig.java
@@ -619,59 +667,6 @@ public class EventsConfig {
 **Solo internos** (eventos de implementación):
 - `ProductUpdated`: Solo le importa a nuestra aplicación
 
-#### 4. Marcar Eventos para Kafka
-
-```java
-// Actualizar ProductEvents.java
-package com.example.store.products.command;
-
-import org.jmolecules.event.annotation.Externalized;
-import org.jmolecules.event.types.DomainEvent;
-
-public class ProductEvents {
-    
-    /**
-     * Evento que se publica tanto internamente como en Kafka.
-     * 
-     * ¿Qué hace @Externalized? Marca este evento para envío a Kafka
-     * ¿Por qué "products.created"? Nombre del tópico en Kafka
-     */
-    @Externalized("products.created")
-    public record ProductCreated(
-        ProductIdentifier id,
-        String name,
-        String description,
-        BigDecimal price,
-        Integer stock,
-        String category
-    ) implements DomainEvent {}
-    
-    /**
-     * Review también va a Kafka para sistemas de analytics.
-     */
-    @Externalized("products.reviewed")
-    public record ProductReviewed(
-        ProductIdentifier productId,
-        ReviewIdentifier reviewId,
-        Integer vote,
-        String comment
-    ) implements DomainEvent {}
-    
-    /**
-     * Este evento NO tiene @Externalized = solo interno.
-     * Solo actualiza la vista dentro de nuestra aplicación.
-     */
-    public record ProductUpdated(
-        ProductIdentifier id,
-        String name,
-        String description,
-        BigDecimal price,
-        Integer stock,
-        String category
-    ) implements DomainEvent {}
-}
-```
-
 ### ¿Qué Pasa Cuando Publicas un Evento?
 
 **Flujo completo**:
@@ -688,7 +683,7 @@ public class ProductEvents {
 
 3. **Spring Modulith actúa**:
    - Busca listeners internos → Ejecuta `ProductEventHandler.on()`
-   - Ve `@Externalized` → Envía también a Kafka
+   - Ve configuración → Envía también a Kafka
 
 4. **En Kafka**:
    ```json
@@ -706,7 +701,146 @@ public class ProductEvents {
    - Servicio de analytics registra nueva categoria
    - Servicio de recomendaciones actualiza algoritmos
 
-## 15. Deployment con Docker
+## Testing de Integración Avanzado
+
+### Testing con Kafka
+
+Para testear la integración con Kafka, necesitamos tests que verifiquen que los eventos se publican correctamente.
+
+```java
+// src/test/java/com/example/store/events/KafkaIntegrationTest.java
+package com.example.store.events;
+
+import com.example.store.products.command.Product.ProductIdentifier;
+import com.example.store.products.command.ProductCommandService;
+import com.example.store.products.command.ProductEvents.ProductCreated;
+import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListener;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.annotation.DirtiesContext;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Test de integración para verificar que eventos se publican a Kafka.
+ * 
+ * ¿Qué hace @EmbeddedKafka?
+ * - Levanta un broker de Kafka real para testing
+ * - No necesita Docker durante tests
+ * - Aislado por test
+ */
+@SpringBootTest
+@EmbeddedKafka(topics = {"products.created", "products.reviewed"})
+@DirtiesContext  // Limpia contexto después de cada test
+@RequiredArgsConstructor
+class KafkaIntegrationTest {
+    
+    private final ProductCommandService productCommandService;
+    private final EmbeddedKafkaBroker embeddedKafka;
+    
+    @Test
+    void shouldPublishProductCreatedEventToKafka() throws InterruptedException {
+        // Arrange: Configurar consumidor de Kafka para test
+        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("test-group", "true", embeddedKafka);
+        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.store");
+        
+        var consumerFactory = new DefaultKafkaConsumerFactory<String, ProductCreated>(consumerProps);
+        var container = new KafkaMessageListenerContainer<>(consumerFactory, 
+            new ContainerProperties("products.created"));
+        
+        BlockingQueue<ConsumerRecord<String, ProductCreated>> records = new LinkedBlockingQueue<>();
+        container.setupMessageListener((MessageListener<String, ProductCreated>) records::add);
+        container.start();
+        
+        // Act: Crear producto
+        ProductIdentifier productId = productCommandService.createProduct(
+            "Test Product", "Description", new BigDecimal("99.99"), 10, "Electronics"
+        );
+        
+        // Assert: Verificar que evento llegó a Kafka
+        ConsumerRecord<String, ProductCreated> record = records.poll(10, TimeUnit.SECONDS);
+        assertThat(record).isNotNull();
+        assertThat(record.value().id()).isEqualTo(productId);
+        assertThat(record.value().name()).isEqualTo("Test Product");
+        
+        // Cleanup
+        container.stop();
+    }
+}
+```
+
+### Testing de Observabilidad
+
+```java
+// src/test/java/com/example/store/observability/TracingTest.java
+package com.example.store.observability;
+
+import com.example.store.products.command.ProductCommandService;
+import io.micrometer.tracing.TraceContext;
+import io.micrometer.tracing.Tracer;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
+import org.springframework.modulith.test.ApplicationModuleTest;
+
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Test para verificar que la trazabilidad funciona correctamente.
+ */
+@ApplicationModuleTest
+@RequiredArgsConstructor
+class TracingTest {
+    
+    private final ProductCommandService productCommandService;
+    private final Tracer tracer;
+    
+    @Test
+    void shouldCreateTraceWhenCreatingProduct() {
+        // Arrange: Verificar que no hay traza activa
+        assertThat(tracer.currentTraceContext().context()).isNull();
+        
+        // Act: Crear producto dentro de una traza
+        var span = tracer.nextSpan().name("test-create-product").start();
+        try (Tracer.SpanInScope ws = tracer.withSpanInScope(span)) {
+            TraceContext context = tracer.currentTraceContext().context();
+            assertThat(context).isNotNull();
+            
+            productCommandService.createProduct(
+                "Traced Product", "Description", new BigDecimal("49.99"), 5, "Test"
+            );
+            
+            // Assert: Verificar que la traza sigue activa
+            assertThat(tracer.currentTraceContext().context()).isEqualTo(context);
+            
+        } finally {
+            span.end();
+        }
+    }
+}
+```
+
+## Deployment con Docker
 
 ### ¿Qué es Docker?
 
@@ -714,7 +848,7 @@ public class ProductEvents {
 
 **Analogía**: Es como un "contenedor de envío" que garantiza que tu aplicación funcione igual en cualquier lugar.
 
-### ¿Por Qué Docker para Desarrollo?
+### ¿Por qué Docker para Desarrollo?
 
 #### Problemas Sin Docker
 
@@ -753,13 +887,9 @@ openzipkin/zipkin     # Misma versión de Zipkin
 task dev              # Todo se instala automáticamente
 ```
 
-### ¿Qué es Docker Compose?
+### Docker Compose Explicado
 
-**Definición**: Docker Compose es una herramienta para definir y ejecutar aplicaciones multi-contenedor.
-
-**Analogía**: Es como una "receta" que describe todos los ingredientes (servicios) y cómo combinarlos.
-
-### Docker Compose Explicado Servicio por Servicio
+Crea `deployment/docker-compose.yml`:
 
 ```yaml
 # deployment/docker-compose.yml
@@ -863,7 +993,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       
       # ¿Crear tópicos automáticamente? Sí, para facilitar desarrollo
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     
     ports:
       - "9092:9092"    # Puerto estándar de Kafka
@@ -948,6 +1078,8 @@ networks:
 
 ### Profile Específico para Docker
 
+Crea `src/main/resources/application-docker.yml`:
+
 ```yaml
 # application-docker.yml
 # ¿Para qué? Configuración específica cuando app corre en contenedor
@@ -975,7 +1107,7 @@ logging:
     com.example.store: INFO
 ```
 
-## 16. Demo Final
+## Demo Final
 
 ### ¿Qué Incluye el Demo?
 
@@ -995,7 +1127,6 @@ task demo
 # - task build:image (construye app)
 # - docker compose up (inicia todo)
 # - Espera servicios listos
-# - Carga datos de ejemplo
 # - Muestra URLs importantes
 ```
 
@@ -1099,9 +1230,18 @@ Después de `task demo`, estos endpoints están disponibles:
 
 - **🌐 Aplicación**: http://localhost:8080
 - **❤️ Health Check**: http://localhost:8080/actuator/health  
-- **🏗️ Información de Módulos**: http://localhost:8080/actuator/modulith
+- **🗂️ Información de Módulos**: http://localhost:8080/actuator/modulith
 - **📊 Trazas Zipkin**: http://localhost:9411
-- **📚 Swagger UI**: http://localhost:8080/swagger-ui.html
+
+### Limpieza del Demo
+
+```bash
+# Detener demo (mantiene datos)
+task demo:stop
+
+# Limpiar completamente (borra datos)
+task demo:clean
+```
 
 ## Conclusión del Workshop
 
@@ -1154,9 +1294,43 @@ Después de `task demo`, estos endpoints están disponibles:
 3. **Optimizar**: Cache, performance, índices BD
 4. **Migrar**: Cuando llegue el momento, extraer módulos a microservicios
 
-**Recuerda**: No hay arquitectura perfecta, solo arquitectura adecuada para tu contexto actual.
+### Evolución Gradual
 
+**Fase 1: Monolito Modular** (donde estamos ahora)
+- Módulos claros
+- Eventos internos
+- Testing independiente
+
+**Fase 2: Híbrido** (cuando sea necesario)
+- Algunos módulos extraídos
+- Comunicación vía Kafka
+- Bases de datos separadas
+
+**Fase 3: Microservicios** (solo si es necesario)
+- Servicios completamente independientes
+- Infraestructura compleja
+- Equipos especializados
+
+### Comandos de Referencia Rápida
+
+```bash
+# Desarrollo diario
+task                    # Tests completos
+task dev               # Entorno de desarrollo
+task test:modulith     # Solo verificar arquitectura
+
+# Demo y deployment  
+task demo              # Demo completo
+task build:image       # Construir imagen Docker
+task infra:start       # Solo servicios base
+
+# Limpieza
+task demo:clean        # Limpiar demo
+task infra:clean       # Limpiar infraestructura
+```
+
+**Recuerda**: No hay arquitectura perfecta, solo arquitectura adecuada para tu contexto actual.
 
 Spring Modulith te da la flexibilidad de empezar simple y evolucionar según tus necesidades reales, no según las modas tecnológicas.
 
-¡Happy coding! 🎉
+¡Feliz codificación! 🎉
