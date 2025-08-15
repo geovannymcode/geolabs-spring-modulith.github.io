@@ -106,7 +106,7 @@ Durante el taller implementaremos una **tienda online** con arquitectura CQRS y 
 ### Verificación del Entorno
 ```bash
 # Verificar instalaciones
-java -version    # Debe mostrar Java 17+
+java -version    # Debe mostrar Java 21+
 mvn -version     # Debe mostrar Maven 3.8+
 docker --version # Docker funcionando
 ```
