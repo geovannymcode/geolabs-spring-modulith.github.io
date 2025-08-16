@@ -13,10 +13,10 @@ copyright: "Copyright &copy; 2025 Geovanny Mendoza"
 theme:
   name: material
 nav:
-  #- Inicio: index.md
-  - Sppring Modulith Parte 1: spring_modulith_part_1.md
-  - Sppring Modulith Parte 2: spring_modulith_part_2.md
-  - Sppring Modulith Parte 3: spring_modulith_part_3.md
+  - Inicio: index.md
+  #- Sppring Modulith Parte 1: spring_modulith_part_1.md
+  #- Sppring Modulith Parte 2: spring_modulith_part_2.md
+  #- Sppring Modulith Parte 3: spring_modulith_part_3.md
 
 # Customization
 extra:
