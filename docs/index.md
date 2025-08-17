@@ -299,13 +299,15 @@ task test:modulith     # Verificar arquitectura
 
 ¿Listo para construir monolitos que no se conviertan en pesadillas?
 
-**[👉 Ir a Parte 1: Configuración y Primer Módulo](./parte1.md)**
-
 ### Estructura del Workshop
 
-1. **[Parte 1: Fundamentos](./parte1.md)** - Setup y primer módulo
-2. **[Parte 2: CQRS Completo](./parte2.md)** - Command, Query y Events  
-3. **[Parte 3: Observabilidad y Deploy](./parte3.md)** - Zipkin, Kafka y Docker
+1. **[Parte 1: Fundamentos](spring_modulith_part_1.md)** - Setup y primer módulo
+2. **[Parte 2: CQRS Completo](spring_modulith_part_2.md)** - Command, Query y Events  
+3. **[Parte 3: Observabilidad y Deploy](spring_modulith_part_3.md)** - Zipkin, Kafka y Docker
+
+### Navegación
+
+Para comenzar el workshop, dirígete a la **[Parte 1: Fundamentos](spring_modulith_part_1.md)** donde configuraremos el proyecto desde cero y crearemos nuestro primer módulo.
 
 ### Información del Instructor
 
