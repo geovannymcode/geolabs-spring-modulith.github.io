@@ -45,6 +45,7 @@ public class ProductController {
 ```
 
 **¿Qué pasó?** Bajo presión de fechas de entrega, los desarrolladores empezaron a tomar atajos:
+
 - "Solo necesito este dato, accedo directo al repositorio"
 - "Es solo una línea, lo pongo aquí temporalmente"
 - "Después refactorizamos esto"
@@ -52,21 +53,27 @@ public class ProductController {
 ### Los Tres Enfoques y Sus Problemas
 
 #### 1. Monolito Tradicional
+
 **Problemas:**
+
 - **Big Ball of Mud**: Todo conectado con todo
 - **Cambios riesgosos**: Modificar una parte rompe 10 lugares
 - **Difícil de entender**: Nuevos desarrolladores se pierden
 - **Testing complejo**: Necesitas cargar toda la aplicación
 
 #### 2. Microservicios
+
 **Problemas:**
+
 - **Complejidad distribuida**: Network latency, timeouts, circuit breakers
 - **Monitoring complejo**: Necesitas rastrear llamadas entre servicios
 - **Costos de infraestructura**: Múltiples bases de datos, servicios
 - **Testing difícil**: Necesitas levantar múltiples servicios
 
 #### 3. Spring Modulith (La Solución Moderna)
+
 **Beneficios:**
+
 - **Modularidad sin distribución**: Módulos claros en un solo JAR
 - **Reglas arquitectónicas automáticas**: El framework previene violaciones
 - **Testing independiente**: Cada módulo se puede testear por separado
@@ -80,7 +87,7 @@ public class ProductController {
 **Definición**: Spring Modulith considera que cada **paquete directo** bajo tu clase principal es un **módulo independiente**.
 
 ```
-📁 com.example.store/              <- Paquete raíz
+📁 com.geovannycode.store/              <- Paquete raíz
 ├── 📄 StoreApplication.java       <- Clase principal
 ├── 📁 products/                   <- MÓDULO: Products
 ├── 📁 orders/                     <- MÓDULO: Orders  
@@ -118,7 +125,7 @@ public class ProductController {
 
 // package-info.java
 @NamedInterface("events")
-package com.example.store.products.events;
+package com.geovannycode.store.products.events;
 
 import org.springframework.modulith.NamedInterface;
 ```
@@ -133,14 +140,15 @@ Visita [https://start.spring.io](https://start.spring.io) y configura:
 - **Project**: Maven Project
 - **Language**: Java  
 - **Spring Boot**: 3.2.5 (o la más reciente)
-- **Group**: `com.example`
+- **Group**: `com.geovannycode`
 - **Artifact**: `store-cqrs`
 - **Name**: `store-cqrs`
-- **Package name**: `com.example.store`
+- **Package name**: `com.geovannycode.store`
 - **Packaging**: Jar
-- **Java**: 17
+- **Java**: 21
 
 **Dependencias a seleccionar:**
+
 - **Spring Web** - Para crear APIs REST
 - **Spring Data JPA** - Para acceso a base de datos
 - **PostgreSQL Driver** - Base de datos que usaremos
@@ -210,8 +218,8 @@ Si necesitas funcionalidades adicionales, agrega estas dependencias:
 Modifica tu clase principal `StoreApplication.java`:
 
 ```java
-// src/main/java/com/example/store/StoreApplication.java
-package com.example.store;
+// src/main/java/com/geovannycode/store/StoreApplication.java
+package com.geovannycode.store;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -222,7 +230,7 @@ import org.springframework.modulith.Modulithic;
  * 
  * ¿Qué hace @Modulithic?
  * 1. Le dice a Spring que esta app usará módulos
- * 2. Cada paquete directo bajo 'com.example.store' será un módulo
+ * 2. Cada paquete directo bajo 'com.geovannycode.store' será un módulo
  * 3. Habilita verificación automática de reglas arquitectónicas
  * 4. Permite comunicación entre módulos vía eventos
  */
@@ -284,7 +292,7 @@ modulith:
 # Logging para desarrollo - ver qué hace Spring Modulith
 logging:
   level:
-    com.example.store: DEBUG
+    com.geovannycode.store: DEBUG
     org.springframework.modulith: DEBUG
 ```
 
@@ -485,7 +493,7 @@ public List<ProductView> getProducts() {
 Vamos a crear la estructura básica que necesita una tienda online:
 
 ```
-📁 src/main/java/com/example/store/
+📁 src/main/java/com/geovannycode/store/
 ├── 📄 StoreApplication.java       <- Clase principal
 ├── 📁 products/                   <- Módulo de productos (empezamos aquí)
 │   ├── 📁 command/               <- Operaciones de escritura
@@ -497,15 +505,15 @@ Vamos a crear la estructura básica que necesita una tienda online:
 
 ### Paso 1: Crear Estructura de Directorios
 
-Crea estas carpetas en `src/main/java/com/example/store/`:
+Crea estas carpetas en `src/main/java/com/geovannycode/store/`:
 
 ```bash
 # Desde tu IDE o terminal
-mkdir -p src/main/java/com/example/store/products/command
-mkdir -p src/main/java/com/example/store/products/query  
-mkdir -p src/main/java/com/example/store/products/events
-mkdir -p src/main/java/com/example/store/common
-mkdir -p src/main/java/com/example/store/config
+mkdir -p src/main/java/com/geovannycode/store/products/command
+mkdir -p src/main/java/com/geovannycode/store/products/query  
+mkdir -p src/main/java/com/geovannycode/store/products/events
+mkdir -p src/main/java/com/geovannycode/store/common
+mkdir -p src/main/java/com/geovannycode/store/config
 ```
 
 ### Paso 2: Crear Migración de Base de Datos
@@ -618,11 +626,11 @@ LEFT JOIN (
 
 ### Paso 3: Crear Clase de Utilidades Comunes
 
-Crea `src/main/java/com/example/store/common/PagedResult.java`:
+Crea `src/main/java/com/geovannycode/store/common/PagedResult.java`:
 
 ```java
-// src/main/java/com/example/store/common/PagedResult.java
-package com.example.store.common;
+// src/main/java/com/geovannycode/store/common/PagedResult.java
+package com.geovannycode.store.common;
 
 import java.util.List;
 
@@ -662,11 +670,11 @@ Antes de escribir código de negocio, necesitamos asegurar que Spring Modulith r
 
 ### Crear Test de Verificación
 
-Crea `src/test/java/com/example/store/ModularityTest.java`:
+Crea `src/test/java/com/geovannycode/store/ModularityTest.java`:
 
 ```java
-// src/test/java/com/example/store/ModularityTest.java
-package com.example.store;
+// src/test/java/com/geovannycode/store/ModularityTest.java
+package com.geovannycode.store;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
@@ -692,7 +700,7 @@ class ModularityTest {
      * Test principal - verifica todas las reglas modulares.
      * 
      * ¿Qué verifica?
-     * - Cada paquete bajo com.example.store es un módulo
+     * - Cada paquete bajo com.geovannycode.store es un módulo
      * - No hay violaciones de acceso entre módulos
      * - No hay dependencias circulares
      * - Las APIs públicas están bien definidas
@@ -753,15 +761,15 @@ class ModularityTest {
 ```
 🏗️ Estructura de módulos detectada:
 📦 Módulo: common
-   📁 Paquete: com.example.store.common
+   📁 Paquete: com.geovannycode.store.common
    🔗 Dependencias: 0
 
 📦 Módulo: config  
-   📁 Paquete: com.example.store.config
+   📁 Paquete: com.geovannycode.store.config
    🔗 Dependencias: 0
 
 📦 Módulo: products
-   📁 Paquete: com.example.store.products
+   📁 Paquete: com.geovannycode.store.products
    🔗 Dependencias: 1
 ```
 
@@ -831,6 +839,7 @@ curl http://localhost:8080/actuator/health
 ### Próximos Pasos
 
 En la **Parte 2** implementaremos:
+
 - Lado Command con entidades y servicios
 - Lado Query con modelos optimizados  
 - Eventos entre módulos
