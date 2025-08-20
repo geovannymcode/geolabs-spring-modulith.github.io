@@ -84,7 +84,7 @@ public class ProductController {
 
 ### ¿Qué es un Módulo en Spring Modulith?
 
-**Definición**: Spring Modulith considera que cada **paquete directo** bajo tu clase principal es un **módulo independiente**.
+Spring Modulith considera que cada **paquete directo** bajo tu clase principal es un **módulo independiente**.
 
 ```
 📁 com.geovannycode.store/              <- Paquete raíz
@@ -137,6 +137,7 @@ import org.springframework.modulith.NamedInterface;
 Visita [https://start.spring.io](https://start.spring.io) y configura:
 
 **Configuración del Proyecto:**
+
 - **Project**: Maven Project
 - **Language**: Java  
 - **Spring Boot**: 3.2.5 (o la más reciente)
