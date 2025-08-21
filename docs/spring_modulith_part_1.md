@@ -56,29 +56,29 @@ public class ProductController {
 
 **Problemas:**
 
-- **Big Ball of Mud**: Todo conectado con todo
-- **Cambios riesgosos**: Modificar una parte rompe 10 lugares
-- **Difícil de entender**: Nuevos desarrolladores se pierden
-- **Testing complejo**: Necesitas cargar toda la aplicación
+- 🔴 **Big Ball of Mud**: Todo conectado con todo
+- 🔴 **Cambios riesgosos**: Modificar una parte rompe 10 lugares
+- 🔴 **Difícil de entender**: Nuevos desarrolladores se pierden
+- 🔴 **Testing complejo**: Necesitas cargar toda la aplicación
 
 #### 2. Microservicios
 
 **Problemas:**
 
-- **Complejidad distribuida**: Network latency, timeouts, circuit breakers
-- **Monitoring complejo**: Necesitas rastrear llamadas entre servicios
-- **Costos de infraestructura**: Múltiples bases de datos, servicios
-- **Testing difícil**: Necesitas levantar múltiples servicios
+- 🔴 **Complejidad distribuida**: Network latency, timeouts, circuit breakers
+- 🔴 **Monitoring complejo**: Necesitas rastrear llamadas entre servicios
+- 🔴 **Costos de infraestructura**: Múltiples bases de datos, servicios
+- 🔴 **Testing difícil**: Necesitas levantar múltiples servicios
 
 #### 3. Spring Modulith (La Solución Moderna)
 
 **Beneficios:**
 
-- **Modularidad sin distribución**: Módulos claros en un solo JAR
-- **Reglas arquitectónicas automáticas**: El framework previene violaciones
-- **Testing independiente**: Cada módulo se puede testear por separado
-- **Evolución gradual**: Fácil migración a microservicios cuando sea necesario
-- **Observabilidad**: Trazabilidad entre módulos como en microservicios
+- ✅ **Modularidad sin distribución**: Módulos claros en un solo JAR
+- ✅ **Reglas arquitectónicas automáticas**: El framework previene violaciones
+- ✅ **Testing independiente**: Cada módulo se puede testear por separado
+- ✅ **Evolución gradual**: Fácil migración a microservicios cuando sea necesario
+- ✅ **Observabilidad**: Trazabilidad entre módulos como en microservicios
 
 ## Entendiendo los Monolitos Modulares
 
@@ -86,8 +86,8 @@ public class ProductController {
 
 Spring Modulith considera que cada **paquete directo** bajo tu clase principal es un **módulo independiente**.
 
-```
-📁 com.geovannycode.store/              <- Paquete raíz
+```yaml
+📁 com.geovannycode.store/         <- Paquete raíz
 ├── 📄 StoreApplication.java       <- Clase principal
 ├── 📁 products/                   <- MÓDULO: Products
 ├── 📁 orders/                     <- MÓDULO: Orders  
@@ -98,30 +98,64 @@ Spring Modulith considera que cada **paquete directo** bajo tu clase principal e
 
 ### Reglas de Acceso Entre Módulos
 
+Spring Modulith implementa un conjunto de reglas para garantizar una correcta modularidad y encapsulación en aplicaciones monolíticas. Estas reglas son verificadas automáticamente en tiempo de compilación y en los tests.
+
 #### Regla 1: Solo las clases públicas en la raíz del módulo son accesibles
 
-**Explicación**: Las clases dentro de sub-paquetes se consideran detalles de implementación privados del módulo.
+Esta regla es fundamental para entender cómo Spring Modulith implementa la encapsulación a nivel de módulo:
+
+1. **¿Qué significa "raíz del módulo"?**
+      - La raíz del módulo es el paquete principal del módulo (por ejemplo, `com.geovannycode.store.products`)
+      - No incluye los sub-paquetes (como `com.geovannycode.store.products.internal`)
+
+2. **Visibilidad automática:**
+      - Solo las clases **públicas** que están **directamente** en el paquete raíz son visibles para otros módulos
+      - Las clases en sub-paquetes están automáticamente "protegidas", incluso si tienen el modificador `public`
+      - Esto funciona como un "firewall" automático que evita dependencias incorrectas
+
+3. **Beneficios prácticos:**
+      - Fuerza a los desarrolladores a pensar en qué clases deben ser parte de la API pública
+      - Evita el "acoplamiento accidental" donde otros módulos dependen de detalles de implementación
+      - Permite refactorizar internamente el módulo sin romper otros módulos
+
+### Ejemplo:
 
 ```java
-// ✅ CORRECTO: Accesible desde otros módulos
 📁 products/
-├── 📄 ProductService.java         <- public class (en raíz)
-├── 📄 Product.java               <- public class (en raíz)
+├── 📄 ProductService.java         <- public class (en raíz) - ACCESIBLE
+├── 📄 Product.java                <- public class (en raíz) - ACCESIBLE
 └── 📁 internal/
-    ├── 📄 ProductRepository.java  <- NO accesible
-    └── 📄 ProductValidator.java   <- NO accesible
+    ├── 📄 ProductRepository.java  <- NO accesible desde otros módulos
+    └── 📄 ProductValidator.java   <- NO accesible desde otros módulos
 ```
+
+Spring Modulith verifica automáticamente que ningún otro módulo intente importar `ProductRepository` o `ProductValidator`, y fallaría los tests si lo hicieran.
 
 #### Regla 2: Named Interfaces para exponer sub-paquetes
 
-**Cuándo usar**: Cuando necesitas exponer clases específicas de sub-paquetes a otros módulos.
+Cuando necesitas hacer una excepción a la Regla 1, puedes usar `@NamedInterface`:
+
+1. **¿Cuándo usar Named Interfaces?**
+      - Cuando necesitas exponer clases específicas de sub-paquetes a otros módulos
+      - Casos comunes: eventos de dominio, DTOs, interfaces de servicio
+
+2. **Cómo funciona:**
+      - Creas un archivo `package-info.java` en el sub-paquete
+      - Anotas el paquete con `@NamedInterface("nombre")`
+      - Esto "expone" todas las clases públicas de ese sub-paquete a otros módulos
+
+3. **Beneficio:**
+      - Control explícito: debes declarar intencionalmente qué quieres exponer
+      - Documentación automática: el nombre de la interfaz muestra el propósito de ese sub-paquete
+
+### Ejemplo:
 
 ```java
 // Si necesitas exponer clases de sub-paquetes:
 📁 products/
-├── 📁 events/
-│   ├── 📄 package-info.java
-│   └── 📄 ProductCreated.java
+├── 📁 events/                    <- Sub-paquete que contiene eventos
+│   ├── 📄 package-info.java      <- Declaración de Named Interface
+│   └── 📄 ProductCreated.java    <- Ahora ACCESIBLE por otros módulos
 
 // package-info.java
 @NamedInterface("events")
@@ -129,6 +163,18 @@ package com.geovannycode.store.products.events;
 
 import org.springframework.modulith.NamedInterface;
 ```
+
+Ahora, otros módulos pueden importar y usar `ProductCreated.java` porque está en un sub-paquete marcado como `@NamedInterface`.
+
+## En la práctica
+
+Estas reglas ayudan a mantener la modularidad porque:
+
+1. Por defecto, todo está "escondido" excepto lo que pones explícitamente en la raíz
+2. Cuando necesitas exponer algo de un sub-paquete, lo haces conscientemente
+3. Spring Modulith verifica automáticamente estas reglas en los tests
+
+Esto facilita saber exactamente qué está expuesto a otros módulos y qué no, lo que hace la aplicación más mantenible a largo plazo.
 
 ## Creando el Proyecto desde Cero
 
