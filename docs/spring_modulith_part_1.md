@@ -186,7 +186,7 @@ Visita [https://start.spring.io](https://start.spring.io) y configura:
 
 - **Project**: Maven Project
 - **Language**: Java  
-- **Spring Boot**: 3.2.5 (o la más reciente)
+- **Spring Boot**: 3.5.5 (o la más reciente)
 - **Group**: `com.geovannycode`
 - **Artifact**: `store-cqrs`
 - **Name**: `store-cqrs`
@@ -202,6 +202,7 @@ Visita [https://start.spring.io](https://start.spring.io) y configura:
 - **Spring Boot DevTools** - Herramientas de desarrollo
 - **Lombok** - Reduce código repetitivo
 - **✅ Spring Modulith** - ¡Disponible en Developer Tools!
+- **Testcontainers** - Levantar Postgres (u otros) en Docker para pruebas de integración.
 
 ### Paso 2: Descargar y Abrir el Proyecto
 
@@ -388,15 +389,18 @@ docker-compose ps
 
 ## ¿Por qué CQRS en una Tienda Online?
 
-### El Escenario Real: E-commerce
+### El Problema: Desbalance de Operaciones en E-commerce
 
-Imagina una tienda online como Amazon o MercadoLibre. ¿Qué operaciones son las más comunes?
+En una tienda online típica, existe un desbalance significativo entre operaciones de lectura y escritura:
 
-**📊 Estadísticas típicas de e-commerce:**
-- **95% de operaciones**: Buscar productos, ver detalles, leer reviews
-- **5% de operaciones**: Comprar, agregar reviews, actualizar inventario
+- **95% de operaciones**: Son lecturas (consultar productos, ver detalles, leer reseñas)
+- **5% de operaciones**: Son escrituras (comprar, agregar reseñas, actualizar inventario)
 
-### Problema Sin CQRS
+Esta proporción crea un desafío técnico importante: **estamos optimizando nuestro sistema para ambos tipos de operaciones cuando tienen necesidades completamente diferentes**.
+
+## El Enfoque Tradicional: Un Modelo Único
+
+Sin CQRS, usamos el mismo modelo para todas las operaciones:
 
 **Modelo único para todo**:
 ```java
@@ -407,36 +411,40 @@ public class Product {
     private String name;
     private BigDecimal price;
     private Integer stock;
-    private List<Review> reviews;  // 1000+ reviews por producto
+    private List<Review> reviews;  // 1000+ reseñas por producto
     private List<Category> categories;
     private List<Image> images;
     private List<Variant> variants;
     // ... 20+ campos más
 }
-
-// Problema 1: Para mostrar lista de productos cargas TODO
-List<Product> products = productRepository.findAll(); // ¡Carga 1000+ reviews por producto!
-
-// Problema 2: Para calcular rating promedio haces esto CADA VEZ
-double rating = product.getReviews().stream()
-    .mapToInt(Review::getRating)
-    .average()
-    .orElse(0.0);
 ```
 
-**Problemas concretos**:
-1. **Performance terrible**: Cargar 1000+ reviews para mostrar una lista
-2. **Cálculos repetidos**: Rating promedio calculado en cada request
-3. **Queries complejas**: JOINs innecesarios para operaciones simples
-4. **Bloqueos de BD**: Escrituras bloquean lecturas
+### Problemas Concretos:
 
-### Solución Con CQRS
+1. **Sobrecarga de Datos**: Para mostrar un simple listado de productos, cargas TODA la información incluidas las relaciones (como 1000+ reseñas)
+   ```java
+   List<Product> products = productRepository.findAll(); // ¡Carga excesiva!
+   ```
+2. **Cálculos Repetitivos**: Para mostrar el rating promedio, realizas el cálculo cada vez que alguien ve el producto
+   ```java
+   double rating = product.getReviews().stream()
+       .mapToInt(Review::getRating)
+       .average()
+       .orElse(0.0);
+   ```
+3. **Queries Complejas**: Necesitas JOINs constantes incluso para operaciones simples
 
-**Separación clara de responsabilidades**:
+4. **Bloqueos de Base de Datos**: Las escrituras pueden bloquear las lecturas, afectando la experiencia del 95% de los usuarios
 
-#### Lado Command (Escritura) - 5% de operaciones
+## **La Solución CQRS: Modelos Especializados**
+
+CQRS divide tu sistema en dos partes con modelos diferentes:
+
+### Lado Command (Escritura) - 5% de operaciones
+
+Optimizado para **consistencia e integridad**:
+
 ```java
-// Optimizado para consistencia e integridad
 @Entity
 public class Product {
     private ProductId id;
@@ -455,9 +463,11 @@ public class Product {
 }
 ```
 
-#### Lado Query (Lectura) - 95% de operaciones  
+#### Lado Query (Lectura) - 95% de operaciones
+
+Optimizado para **velocidad y simplicidad**:
+
 ```java
-// Optimizado para velocidad de lectura
 @Entity
 public class ProductView {
     private ProductId id;
@@ -475,19 +485,24 @@ public class ProductView {
 
 ### Beneficios Específicos para E-commerce
 
-#### 1. **Performance de Búsqueda**
+#### 1. **Performance de Búsqueda Dramáticamente Mejorada**
+
+Con CQRS:
 ```java
 // ✅ Query súper rápida - datos ya listos
 @Query("SELECT p FROM ProductView p WHERE p.categoryName = :category ORDER BY p.averageRating DESC")
 List<ProductView> findByCategoryOrderByRating(String category);
 
-// ❌ Sin CQRS - query lenta con múltiples JOINs
+Sin CQRS:
+// ❌ Consulta lenta con múltiples JOINs y cálculos
 @Query("SELECT p FROM Product p JOIN p.categories c JOIN p.reviews r WHERE c.name = :category GROUP BY p ORDER BY AVG(r.rating) DESC")
 ```
 
-#### 2. **Escalabilidad de Lectura**
+#### 2. **Escalabilidad Horizontal de Lecturas**
+
+Puedes tener múltiples réplicas de base de datos dedicadas solo para lecturas:
+
 ```java
-// Lado Query: Múltiples réplicas de BD solo para lectura
 @Configuration
 public class DatabaseConfig {
     @Bean("readOnlyDataSource")
@@ -497,12 +512,17 @@ public class DatabaseConfig {
 }
 ```
 
-#### 3. **Actualizaciones Asíncronas**
+Esto significa que puedes escalar la capacidad de lectura independientemente de la capacidad de escritura.
+
+#### 3. **Mejor Experiencia de Usuario con Actualizaciones Asíncronas**
+
+Cuando un usuario agrega una reseña:
+
+1. La reseña se guarda inmediatamente (Command)
+2. El usuario recibe confirmación sin esperar
+3. Los datos de lectura se actualizan asíncronamente (Query)
+
 ```java
-// Cuando agregan un review:
-// 1. Se guarda inmediatamente (Command)
-// 2. Se actualiza vista asíncronamente (Query) 
-// 3. Usuario ve confirmación sin esperar
 @ApplicationModuleListener
 void on(ProductReviewed event) {
     // Actualizar rating promedio en background
@@ -510,9 +530,9 @@ void on(ProductReviewed event) {
 }
 ```
 
-### ¿Por Qué No Usar Caché Simplemente?
+### CQRS vs. Caché: ¿Por qué no usar simplemente caché?
 
-**Cache vs CQRS**:
+**Caché:**
 
 ```java
 // ❌ Caché: Datos pueden estar desactualizados
@@ -520,18 +540,23 @@ void on(ProductReviewed event) {
 public List<Product> getProducts() {
     return productRepository.findAll(); // Datos de hace 1 hora
 }
+```
 
+**CQRS:**
+
+```java
 // ✅ CQRS: Datos específicamente optimizados para lectura
 public List<ProductView> getProducts() {
-    return productViewRepository.findAll(); // Modelo diseñado para esto
+    return productViewRepository.findAll(); // Modelo específicamente diseñado
 }
 ```
 
 **CQRS es superior porque**:
-- **Modelos específicos**: Diseñados para cada uso
-- **Actualización controlada**: Sabes exactamente cuándo se actualiza
-- **Sin invalidación**: No hay problemas de cache invalidation
-- **Queries simples**: Sin JOINs complejos
+
+1. **Modelos Específicos**: Diseñados exactamente para cada caso de uso
+2. **Actualización Controlada**: Sabes exactamente cuándo y cómo se actualizan los datos
+3. **Sin Problemas de Invalidación**: No hay la complejidad de gestionar cuándo invalidar cachés
+4. **Queries Inherentemente Simples**: Sin necesidad de JOINs complejos o transformaciones
 
 ## Implementando el Primer Módulo
 
@@ -741,7 +766,7 @@ import org.springframework.modulith.docs.Documenter;
 class ModularityTest {
     
     // Spring Modulith analiza la aplicación y encuentra módulos
-    ApplicationModules modules = ApplicationModules.of(StoreApplication.class);
+    ApplicationModules modules = ApplicationModules.of(StoreCqrsApplication.class);
     
     /**
      * Test principal - verifica todas las reglas modulares.
