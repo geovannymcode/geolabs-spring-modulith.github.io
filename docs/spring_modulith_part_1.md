@@ -806,12 +806,25 @@ class ModularityTest {
      */
     @Test
     void showModuleStructure() {
-        System.out.println("\n🏗️ Estructura de módulos detectada:");
+        log.info("🏗️ Estructura de módulos detectada:");
         modules.forEach(module -> {
-            System.out.println("📦 Módulo: " + module.getName());
-            System.out.println("   📁 Paquete: " + module.getBasePackage());
-            System.out.println("   🔗 Dependencias: " + module.getDependencies().size());
-            System.out.println();
+            var name = module.getDisplayName();                       
+            var basePkg = module.getBasePackage().getName();
+
+            // Dependencias directas (o usa getDependencies(modules, DependencyDepth.DIRECT, ...) si prefieres)
+            long directDeps = module.getDirectDependencies(modules).uniqueModules().count();
+
+            String depsList = module.getDirectDependencies(modules)
+                    .uniqueModules()
+                    .map(ApplicationModule::getDisplayName)
+                    .sorted()
+                    .collect(Collectors.joining(", "));
+
+            if (depsList.isBlank()) depsList = "(ninguna)";
+
+            log.info("📦 Módulo: {}", name);
+            log.info("   📁 Paquete: {}", basePkg);
+            log.info("   🔗 Dependencias directas ({}): {}", directDeps, depsList);
         });
     }
 }
@@ -835,15 +848,16 @@ class ModularityTest {
 📦 Módulo: common
    📁 Paquete: com.geovannycode.store.common
    🔗 Dependencias: 0
+```
 
-📦 Módulo: config  
+<!-- 📦 Módulo: config  
    📁 Paquete: com.geovannycode.store.config
    🔗 Dependencias: 0
 
 📦 Módulo: products
    📁 Paquete: com.geovannycode.store.products
    🔗 Dependencias: 1
-```
+-->
 
 ### Paso 2: Verificar Documentación Generada
 
