@@ -878,7 +878,7 @@ class ModularityTest {
 ./mvnw test -Dtest=ModularityTest
 
 # Si todo está bien, verás:
-# ✅ Tests run: 3, Failures: 0, Errors: 0
+# ✅ Tests run: 1, Failures: 0, Errors: 0
 ```
 
 **Salida esperada:**
