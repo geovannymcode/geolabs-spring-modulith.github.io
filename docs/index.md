@@ -59,16 +59,19 @@ Durante el taller implementaremos una **tienda online** con arquitectura CQRS y 
 ### Funcionalidades Implementadas
 
 **Gestión de Productos**:
+
 - Crear y actualizar productos
 - Agregar reviews y calificaciones
 - Consultas optimizadas por categoría y rating
 
 **Arquitectura CQRS**:
+
 - **Lado Command**: Modelos para escritura (consistencia)
 - **Lado Query**: Modelos para lectura (performance)
 - **Sincronización automática** via eventos
 
 **Observabilidad**:
+
 - Trazabilidad entre módulos con Zipkin
 - Métricas y health checks
 - Eventos externos con Kafka
@@ -76,18 +79,21 @@ Durante el taller implementaremos una **tienda online** con arquitectura CQRS y 
 ## Estructura del Workshop
 
 ### Parte 1: Fundamentos (30 min)
+
 - ¿Por qué Spring Modulith?
 - Configuración del proyecto
 - Primer módulo funcional
 - Verificación de reglas arquitectónicas
 
-### Parte 2: CQRS en Acción (45 min)  
+### Parte 2: CQRS en Acción (45 min)
+
 - Implementación lado Command
 - Implementación lado Query
 - Eventos entre módulos
 - Testing independiente
 
 ### Parte 3: Producción (15 min)
+
 - Observabilidad con Zipkin
 - Automatización con Taskfile
 - Deployment con Docker
@@ -97,7 +103,7 @@ Durante el taller implementaremos una **tienda online** con arquitectura CQRS y 
 
 ### Software Necesario
 
-- **Java 21+** 
+- **Java 21+**
 - **Maven 3.8+**
 - **Docker Desktop**
 - **IDE** (IntelliJ IDEA, VS Code, Eclipse)
@@ -301,13 +307,13 @@ task test:modulith     # Verificar arquitectura
 
 ### Estructura del Workshop
 
-1. **[Parte 1: Fundamentos]<!-- (spring_modulith_part_1.md)-->** - Setup y primer módulo
-2. **[Parte 2: CQRS Completo]<!--(spring_modulith_part_2.md)-->** - Command, Query y Events  
-3. **[Parte 3: Observabilidad y Deploy]<!--(spring_modulith_part_3.md)-->** - Zipkin, Kafka y Docker
+1. **[Parte 1: Fundamentos](spring_modulith_part_1.md)** - Setup y primer módulo
+2. **[Parte 2: CQRS Completo](spring_modulith_part_2.md)** - Command, Query y Events  
+3. **[Parte 3: Observabilidad y Deploy](spring_modulith_part_3.md)** - Zipkin, Kafka y Docker
 
 ### Navegación
 
-Para comenzar el workshop, dirígete a la **[Parte 1: Fundamentos]<!--(spring_modulith_part_1.md)-->** donde configuraremos el proyecto desde cero y crearemos nuestro primer módulo.
+Para comenzar el workshop, dirígete a la **[Parte 1: Fundamentos](spring_modulith_part_1.md)** donde configuraremos el proyecto desde cero y crearemos nuestro primer módulo.
 
 ### Información del Instructor
 
