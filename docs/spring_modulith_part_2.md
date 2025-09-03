@@ -5,6 +5,7 @@
 En la Parte 1 configuramos la base del proyecto. Ahora vamos a implementar completamente el patrón CQRS con Spring Modulith, paso a paso.
 
 ## Tabla de Contenidos - Parte 2
+
 1. [Implementando las Entidades del Lado Command](#implementando-las-entidades-del-lado-command)
 2. [ProductRepository - La Puerta de Acceso a la Base de Datos](#productrepository---la-puerta-de-acceso-a-la-base-de-datos)
 3. [ProductCommandService - El Cerebro de las Operaciones](#productcommandservice---el-cerebro-de-las-operaciones)
@@ -22,11 +23,11 @@ Antes de comenzar con los repositories y services, necesitamos crear las entidad
 
 ### Paso 1: Crear las Entidades de Comando
 
-Crea `src/main/java/com/example/store/products/command/Product.java`:
+Crea `src/main/java/com/geovannycode/store/products/command/Product.java`:
 
 ```java
-// src/main/java/com/example/store/products/command/Product.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/Product.java
+package com.geovannycode.store.products.command;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -83,11 +84,11 @@ public class Product implements AggregateRoot<Product, Product.ProductIdentifier
 }
 ```
 
-Crea `src/main/java/com/example/store/products/command/Review.java`:
+Crea `src/main/java/com/geovannycode/store/products/command/Review.java`:
 
 ```java
-// src/main/java/com/example/store/products/command/Review.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/Review.java
+package com.geovannycode.store.products.command;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -123,11 +124,11 @@ public class Review implements Entity<Product, ReviewIdentifier> {
 }
 ```
 
-Crea `src/main/java/com/example/store/products/command/ReviewIdentifier.java`:
+Crea `src/main/java/com/geovannycode/store/products/command/ReviewIdentifier.java`:
 
 ```java
-// src/main/java/com/example/store/products/command/ReviewIdentifier.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/ReviewIdentifier.java
+package com.geovannycode.store.products.command;
 
 import org.jmolecules.ddd.types.Identifier;
 
@@ -147,13 +148,13 @@ public record ReviewIdentifier(UUID id) implements Identifier {
 
 ### Paso 2: Crear los Eventos de Dominio
 
-Crea `src/main/java/com/example/store/products/command/ProductEvents.java`:
+Crea `src/main/java/com/geovannycode/store/products/command/ProductEvents.java`:
 
 ```java
-// src/main/java/com/example/store/products/command/ProductEvents.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/ProductEvents.java
+package com.geovannycode.store.products.command;
 
-import com.example.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
 import org.jmolecules.event.types.DomainEvent;
 
 import java.math.BigDecimal;
@@ -217,10 +218,10 @@ public class ProductEvents {
 ### Implementación paso a paso
 
 ```java
-// src/main/java/com/example/store/products/command/ProductRepository.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/ProductRepository.java
+package com.geovannycode.store.products.command;
 
-import com.example.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -319,13 +320,13 @@ public void transferirDinero(String origen, String destino, BigDecimal cantidad)
 ### Implementación paso a paso
 
 ```java
-// src/main/java/com/example/store/products/command/ProductCommandService.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/ProductCommandService.java
+package com.geovannycode.store.products.command;
 
-import com.example.store.products.command.Product.ProductIdentifier;
-import com.example.store.products.command.ProductEvents.ProductCreated;
-import com.example.store.products.command.ProductEvents.ProductReviewed;
-import com.example.store.products.command.ProductEvents.ProductUpdated;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.ProductEvents.ProductCreated;
+import com.geovannycode.store.products.command.ProductEvents.ProductReviewed;
+import com.geovannycode.store.products.command.ProductEvents.ProductUpdated;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -490,10 +491,10 @@ class ProductCommandService {
 ### Implementación paso a paso
 
 ```java
-// src/main/java/com/example/store/products/command/ProductCommandController.java
-package com.example.store.products.command;
+// src/main/java/com/geovannycode/store/products/command/ProductCommandController.java
+package com.geovannycode.store.products.command;
 
-import com.example.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -689,11 +690,11 @@ public List<ProductView> getProductsByRating() {
 ### Implementación de ProductView
 
 ```java
-// src/main/java/com/example/store/products/query/ProductView.java
-package com.example.store.products.query;
+// src/main/java/com/geovannycode/store/products/query/ProductView.java
+package com.geovannycode.store.products.query;
 
-import com.example.store.products.command.Product.ProductIdentifier;
-import com.example.store.products.command.ProductEvents.ProductReviewed;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.ProductEvents.ProductReviewed;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -783,12 +784,12 @@ class ProductView implements AggregateRoot<ProductView, ProductIdentifier> {
 ### Implementación paso a paso
 
 ```java
-// src/main/java/com/example/store/products/query/ProductEventHandler.java
-package com.example.store.products.query;
+// src/main/java/com/geovannycode/store/products/query/ProductEventHandler.java
+package com.geovannycode.store.products.query;
 
-import com.example.store.products.command.ProductEvents.ProductCreated;
-import com.example.store.products.command.ProductEvents.ProductReviewed;
-import com.example.store.products.command.ProductEvents.ProductUpdated;
+import com.geovannycode.store.products.command.ProductEvents.ProductCreated;
+import com.geovannycode.store.products.command.ProductEvents.ProductReviewed;
+import com.geovannycode.store.products.command.ProductEvents.ProductUpdated;
 import lombok.RequiredArgsConstructor;
 import org.jmolecules.event.annotation.DomainEventHandler;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -915,10 +916,10 @@ List<ProductView> findAllOrderByRatingDesc();
 ### Implementación del Repository de Query
 
 ```java
-// src/main/java/com/example/store/products/query/ProductViewRepository.java
-package com.example.store.products.query;
+// src/main/java/com/geovannycode/store/products/query/ProductViewRepository.java
+package com.geovannycode.store.products.query;
 
-import com.example.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
@@ -979,10 +980,10 @@ interface ProductViewRepository extends ListCrudRepository<ProductView, ProductI
 ### Implementación del Controller de Query
 
 ```java
-// src/main/java/com/example/store/products/query/ProductViewController.java
-package com.example.store.products.query;
+// src/main/java/com/geovannycode/store/products/query/ProductViewController.java
+package com.geovannycode.store.products.query;
 
-import com.example.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -1125,8 +1126,8 @@ class ProductTest {
 ### Test del Command Service
 
 ```java
-// src/test/java/com/example/store/products/command/ProductCommandServiceTest.java
-package com.example.store.products.command;
+// src/test/java/com/geovannycode/store/products/command/ProductCommandServiceTest.java
+package com.geovannycode.store.products.command;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -1292,15 +1293,15 @@ class ProductCommandServiceTest {
 ### Test del Event Handler
 
 ```java
-// src/test/java/com/example/store/products/query/EventHandlerIntegrationTest.java
-package com.example.store.products.query;
+// src/test/java/com/geovannycode/store/products/query/EventHandlerIntegrationTest.java
+package com.geovannycode.store.products.query;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.example.store.products.command.Product.ProductIdentifier;
-import com.example.store.products.command.ProductEvents.ProductCreated;
-import com.example.store.products.command.ProductEvents.ProductReviewed;
-import com.example.store.products.command.ReviewIdentifier;
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
+import com.geovannycode.store.products.command.ProductEvents.ProductCreated;
+import com.geovannycode.store.products.command.ProductEvents.ProductReviewed;
+import com.geovannycode.store.products.command.ReviewIdentifier;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
@@ -1382,8 +1383,8 @@ class EventHandlerIntegrationTest {
 ### Test de Estructura del Módulo
 
 ```java
-// src/test/java/com/example/store/products/ProductsModuleIntegrationTests.java
-package com.example.store.products;
+// src/test/java/com/geovannycode/store/products/ProductsModuleIntegrationTests.java
+package com.geovannycode.store.products;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.modulith.test.ApplicationModuleTest;
@@ -1418,7 +1419,7 @@ class ProductsModuleIntegrationTests {
 
 ```bash
 # Ejecutar solo tests del módulo products
-./mvnw test -Dtest="com.example.store.products.**"
+./mvnw test -Dtest="com.geovannycode.store.products.**"
 
 # Ejecutar solo tests de command
 ./mvnw test -Dtest="*CommandServiceTest"
@@ -1436,7 +1437,7 @@ docker ps  # (ejecutar en otra terminal mientras corre el test)
 
 #### 1. **Módulo de Inventario**
 ```java
-// src/main/java/com/example/store/inventory/InventoryService.java
+// src/main/java/com/geovannycode/store/inventory/InventoryService.java
 @ApplicationModuleListener
 void on(ProductCreated event) {
     // Crear stock inicial cuando se crea un producto
@@ -1512,6 +1513,7 @@ PagedResult<ProductView> getAllProducts(Pageable pageable) {
 ### Preparándose para la Parte 3
 
 En la **Parte 3** completaremos el workshop con:
+
 - **Monitoreo y observabilidad** del sistema
 - **Performance tuning** y optimizaciones avanzadas
 - **Deployment** con Docker y Docker Compose
