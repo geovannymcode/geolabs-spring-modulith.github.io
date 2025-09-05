@@ -21,7 +21,23 @@ En la Parte 1 configuramos la base del proyecto. Ahora vamos a implementar compl
 
 Antes de comenzar con los repositories y services, necesitamos crear las entidades básicas. Empezaremos por las clases que faltaban de la Parte 1.
 
-### Paso 1: Crear las Entidades de Comando
+### Paso 1: Agregar dependencia jMolecules
+
+Primero, debemos agregar la dependencia de jMolecules a nuestro archivo `pom.xml`. Esta biblioteca proporciona las interfaces y anotaciones necesarias para implementar Domain-Driven Design (DDD) en nuestro proyecto CQRS:
+
+```xml
+<dependency>
+    <groupId>org.jmolecules</groupId>
+    <artifactId>jmolecules-ddd</artifactId>
+    <version>1.4.0</version>
+</dependency>
+```
+
+Esta dependencia es esencial para utilizar interfaces como `AggregateRoot`, `Entity` e `Identifier` que utilizamos en nuestras clases de dominio.
+
+### Paso 2: Crear las Entidades de Comando
+
+#### Product.java
 
 Crea `src/main/java/com/geovannycode/store/products/command/Product.java`:
 
@@ -84,6 +100,8 @@ public class Product implements AggregateRoot<Product, Product.ProductIdentifier
 }
 ```
 
+#### Review.java
+
 Crea `src/main/java/com/geovannycode/store/products/command/Review.java`:
 
 ```java
@@ -124,6 +142,8 @@ public class Review implements Entity<Product, ReviewIdentifier> {
 }
 ```
 
+#### ReviewIdentifier.java
+
 Crea `src/main/java/com/geovannycode/store/products/command/ReviewIdentifier.java`:
 
 ```java
@@ -146,7 +166,18 @@ public record ReviewIdentifier(UUID id) implements Identifier {
 }
 ```
 
-### Paso 2: Crear los Eventos de Dominio
+## ¿Por qué necesitamos jMolecules?
+
+jMolecules proporciona las interfaces base que utilizamos para implementar conceptos de DDD:
+
+- `AggregateRoot`: Identifica un agregado raíz en nuestro dominio (Product)
+- `Entity`: Identifica una entidad dentro del agregado (Review)
+- `Identifier`: Proporciona identificadores value-object para nuestras entidades
+
+Esta biblioteca nos ayuda a expresar claramente la estructura del dominio y las relaciones entre entidades, siguiendo las mejores prácticas de DDD.
+
+
+### Paso 3: Crear los Eventos de Dominio
 
 Crea `src/main/java/com/geovannycode/store/products/command/ProductEvents.java`:
 
@@ -275,11 +306,13 @@ interface ProductRepository extends CrudRepository<Product, ProductIdentifier> {
 ### Conceptos importantes que vamos a usar:
 
 #### ¿Qué es @Service?
+
 - Le dice a Spring: "Esta clase contiene lógica de negocio"
 - Spring la crea automáticamente (no necesitas `new ProductCommandService()`)
 - Permite que otras clases la usen con `@Autowired` o constructor
 
 #### ¿Qué es @Transactional?
+
 **Definición simple**: "Todo o nada" para operaciones de base de datos
 
 **Ejemplo práctico**:
@@ -298,6 +331,7 @@ public void transferirDinero(String origen, String destino, BigDecimal cantidad)
 ```
 
 **¿Por qué es importante?**
+
 - Garantiza que la base de datos siempre esté consistente
 - Si algo falla, automáticamente deshace todos los cambios
 - No tienes que manejar manualmente las fallas
