@@ -337,9 +337,11 @@ public void transferirDinero(String origen, String destino, BigDecimal cantidad)
 - No tienes que manejar manualmente las fallas
 
 #### ¿Qué es ApplicationEventPublisher?
+
 **Definición simple**: El "mensajero" que envía eventos a otros módulos
 
 **¿Cómo funciona?**
+
 1. Publicas: `eventPublisher.publishEvent(new ProductCreated(...))`
 2. Spring busca quién quiere escuchar ese evento
 3. Spring se lo entrega automáticamente
@@ -347,6 +349,7 @@ public void transferirDinero(String origen, String destino, BigDecimal cantidad)
 **Analogía**: Como WhatsApp - envías un mensaje a un grupo y todos los miembros lo reciben
 
 #### ¿Qué es @RequiredArgsConstructor?
+
 - Lombok genera automáticamente un constructor con todos los campos `final`
 - Es la forma moderna de hacer dependency injection
 - Más limpio que `@Autowired` en cada campo
