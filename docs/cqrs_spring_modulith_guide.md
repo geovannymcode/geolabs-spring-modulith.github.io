@@ -50,6 +50,7 @@ public class ProductController {
 ```
 
 **¿Qué pasó?** Bajo presión de fechas de entrega, los desarrolladores empezaron a tomar atajos:
+
 - "Solo necesito este dato, accedo directo al repositorio"
 - "Es solo una línea, lo pongo aquí temporalmente"
 - "Después refactorizamos esto"
@@ -57,21 +58,27 @@ public class ProductController {
 ### Los Tres Enfoques y Sus Problemas
 
 #### 1. Monolito Tradicional
+
 **Problemas:**
+
 - 🔴 **Big Ball of Mud**: Todo conectado con todo
 - 🔴 **Cambios riesgosos**: Modificar una parte rompe 10 lugares
 - 🔴 **Difícil de entender**: Nuevos desarrolladores se pierden
 - 🔴 **Testing complejo**: Necesitas cargar toda la aplicación
 
 #### 2. Microservicios
+
 **Problemas:**
+
 - 🔴 **Complejidad distribuida**: Network latency, timeouts, circuit breakers
 - 🔴 **Monitoring complejo**: Necesitas rastrear llamadas entre servicios
 - 🔴 **Costos de infraestructura**: Múltiples bases de datos, servicios
 - 🔴 **Testing difícil**: Necesitas levantar múltiples servicios
 
 #### 3. Spring Modulith (La Solución Intermedia)
+
 **Beneficios:**
+
 - ✅ **Modularidad sin distribución**: Módulos claros en un solo JAR
 - ✅ **Reglas arquitectónicas automáticas**: El framework previene violaciones
 - ✅ **Testing independiente**: Cada módulo se puede testear por separado
@@ -145,7 +152,7 @@ import org.springframework.modulith.ApplicationModule;
 
 ### Prerequisitos y Herramientas
 
-1. **Java 17 o superior** - Spring Modulith requiere versiones modernas
+1. **Java 21 o superior** - Spring Modulith requiere versiones modernas
 2. **Maven 3.8+** - Para gestión de dependencias
 3. **IDE moderno** - IntelliJ IDEA, Eclipse, VS Code
 4. **Docker Desktop** - Para PostgreSQL y servicios auxiliares
@@ -184,6 +191,7 @@ Visita [https://start.spring.io](https://start.spring.io) y configura:
 - **Java**: 17
 
 **Dependencias iniciales a agregar:**
+
 - Spring Web
 - Spring Data JPA
 - PostgreSQL Driver
