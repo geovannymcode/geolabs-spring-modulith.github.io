@@ -299,7 +299,7 @@ interface ProductRepository extends CrudRepository<Product, ProductIdentifier> {
 
 ### ¿Qué hace un Service?
 
-**Definición simple**: Contiene la lógica de negocio  
+**Definición**: Contiene la lógica de negocio  
 **Ejemplo**: "Para crear un producto, validar datos + guardar + notificar"  
 **Regla**: Los Controllers son delgados, los Services contienen la lógica
 
@@ -313,7 +313,7 @@ interface ProductRepository extends CrudRepository<Product, ProductIdentifier> {
 
 #### ¿Qué es @Transactional?
 
-**Definición simple**: "Todo o nada" para operaciones de base de datos
+**Definición**: "Todo o nada" para operaciones de base de datos
 
 **Ejemplo práctico**:
 ```java
@@ -354,6 +354,84 @@ public void transferirDinero(String origen, String destino, BigDecimal cantidad)
 - Es la forma moderna de hacer dependency injection
 - Más limpio que `@Autowired` en cada campo
 
+## Organización del código para manejo de errores
+
+Para una mejor organización y siguiendo buenas prácticas, tenemos un paquete dedicado para las excepciones:
+
+```java
+com.geovannycode.store.products.exception
+```
+
+Dentro de este paquete encontramos:
+
+### ProductException (Base)
+
+```java
+package com.geovannycode.store.products.exception;
+
+/**
+ * Excepción base para todas las excepciones relacionadas con productos.
+ * Define un comportamiento común para todas las excepciones del módulo.
+ */
+public abstract class ProductException extends RuntimeException {
+    public ProductException(String message) {
+        super(message);
+    }
+    
+    public ProductException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+**¿Por qué una clase base abstracta?**
+
+- Permite agrupar todas las excepciones de productos
+- Facilita el manejo de excepciones en los controladores
+- Crea una jerarquía clara de excepciones
+
+### ProductNotFoundException
+
+```java
+package com.geovannycode.store.products.exception;
+
+/**
+ * Excepción lanzada cuando se intenta acceder a un producto que no existe.
+ */
+public class ProductNotFoundException extends ProductException {
+    public ProductNotFoundException(String message) {
+        super(message);
+    }
+}
+```
+
+**¿Cuándo se usa?**
+
+- Cuando intentamos buscar un producto que no existe
+- En operaciones de actualización cuando el producto no se encuentra
+- En cualquier operación que requiera un producto existente
+
+### InvalidVoteException
+
+```java
+package com.geovannycode.store.products.exception;
+
+/**
+ * Excepción lanzada cuando se intenta crear una reseña con un voto inválido.
+ */
+public class InvalidVoteException extends ProductException {
+    public InvalidVoteException(String message) {
+        super(message);
+    }
+}
+```
+
+**¿Cuándo se usa?**
+
+- Cuando el voto está fuera del rango permitido (1-5)
+- Cuando el voto es nulo
+- Para validar las reglas de negocio de las reseñas
+
 ### Implementación paso a paso
 
 ```java
@@ -383,6 +461,10 @@ import java.math.BigDecimal;
 @Transactional              // Todas las operaciones son "todo o nada"
 @RequiredArgsConstructor    // Lombok genera constructor con campos final
 class ProductCommandService {
+
+    // Constantes para mensajes de error
+    private static final String PRODUCT_NOT_FOUND = "Product not found with id: ";
+    private static final String INVALID_VOTE_RANGE = "Vote must be between 1 and 5";
     
     // Dependencias que Spring inyecta automáticamente
     private final ProductRepository products;
@@ -405,23 +487,15 @@ class ProductCommandService {
     ProductIdentifier createProduct(String name, String description, BigDecimal price, 
                                    Integer stock, String category) {
         
-        // Paso 1: Crear el objeto Product
-        var product = new Product();
-        product.setName(name);
-        product.setDescription(description);
-        product.setPrice(price);
-        product.setStock(stock);
-        product.setCategory(category);
-        
+         // Paso 1: Crear el objeto Product
+        var product = createProductEntity(name, description, price, stock, category);
+
         // Paso 2: Guardar en base de datos
         var saved = products.save(product);
-        
+
         // Paso 3: Publicar evento (solo si el guardado fue exitoso)
-        eventPublisher.publishEvent(
-            new ProductCreated(saved.getId(), saved.getName(), saved.getDescription(), 
-                             saved.getPrice(), saved.getStock(), saved.getCategory())
-        );
-        
+        publishProductCreatedEvent(saved);
+
         // Paso 4: Devolver el ID
         return saved.getId();
     }
@@ -437,25 +511,13 @@ class ProductCommandService {
     void updateProduct(ProductIdentifier productId, String name, String description, 
                       BigDecimal price, Integer stock, String category) {
         
-        // Buscar el producto o fallar si no existe
-        var product = products.findById(productId)
-            .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
-        
-        // Actualizar los datos
-        product.setName(name);
-        product.setDescription(description);
-        product.setPrice(price);
-        product.setStock(stock);
-        product.setCategory(category);
-        
-        // Guardar cambios
+         // Buscar y actualizar el producto
+        var product = findProductOrThrow(productId);
+        updateProductFields(product, name, description, price, stock, category);
+
+        // Persistir y publicar evento
         products.save(product);
-        
-        // Notificar que el producto cambió
-        eventPublisher.publishEvent(
-            new ProductUpdated(product.getId(), product.getName(), product.getDescription(),
-                             product.getPrice(), product.getStock(), product.getCategory())
-        );
+        publishProductUpdatedEvent(product);
     }
     
     /**
@@ -472,28 +534,108 @@ class ProductCommandService {
      * - El código lee como una secuencia de pasos
      */
     Review addReview(ProductIdentifier productId, Integer vote, String comment) {
-        // Validación de negocio a nivel de servicio
-        if (vote < 1 || vote > 5) {
-            throw new IllegalArgumentException("Vote must be between 1 and 5");
-        }
-        
+        // Validar el voto según reglas de negocio
+        validateVote(vote);
+
         // Crear el review
+        var review = createReview(vote, comment);
+
+        // Buscar producto, agregar review y guardar
+        var product = findProductOrThrow(productId)
+                .add(review);
+        products.save(product);
+
+        // Publicar evento de review añadido
+        publishReviewAddedEvent(product.getId(), review);
+
+        return review;
+    }
+
+// ===== Métodos privados de soporte =====
+
+    private Product createProductEntity(String name, String description,
+                                       BigDecimal price, Integer stock, String category) {
+        var product = new Product();
+        product.setName(name);
+        product.setDescription(description);
+        product.setPrice(price);
+        product.setStock(stock);
+        product.setCategory(category);
+        return product;
+    }
+
+    private void publishProductCreatedEvent(Product product) {
+        eventPublisher.publishEvent(
+                new ProductEvents.ProductCreated(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getStock(),
+                        product.getCategory()
+                )
+        );
+    }
+
+    private void updateProductFields(Product product, String name, String description,
+                                    BigDecimal price, Integer stock, String category) {
+        product.setName(name);
+        product.setDescription(description);
+        product.setPrice(price);
+        product.setStock(stock);
+        product.setCategory(category);
+    }
+
+    private Review createReview(Integer vote, String comment) {
         var review = new Review();
         review.setVote(vote);
         review.setComment(comment);
-        
-        // Buscar producto, agregar review, guardar
-        var product = products.findById(productId)
-            .map(it -> it.add(review))      // Agregar review al producto
-            .map(products::save)            // Guardar el producto actualizado
-            .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
-        
-        // Notificar que se agregó un review
-        eventPublisher.publishEvent(
-            new ProductReviewed(product.getId(), review.getId(), review.getVote(), review.getComment())
-        );
-        
         return review;
+    }
+
+    private void publishProductUpdatedEvent(Product product) {
+        eventPublisher.publishEvent(
+                new ProductEvents.ProductUpdated(
+                        product.getId(),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getStock(),
+                        product.getCategory()
+                )
+        );
+    }
+
+    /**
+     * Busca un producto por ID o lanza una excepción si no existe.
+     * 
+     * @throws ProductNotFoundException si el producto no existe
+     */
+    private Product findProductOrThrow(Product.ProductIdentifier productId) {
+        return products.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_NOT_FOUND + productId));
+    }
+
+    /**
+     * Valida que el voto esté dentro del rango permitido.
+     * 
+     * @throws InvalidVoteException si el voto es nulo o está fuera de rango
+     */
+    private void validateVote(Integer vote) {
+        if (vote == null || vote < 1 || vote > 5) {
+            throw new InvalidVoteException(INVALID_VOTE_RANGE);
+        }
+    }
+
+    private void publishReviewAddedEvent(Product.ProductIdentifier productId, Review review) {
+        eventPublisher.publishEvent(
+                new ProductEvents.ProductReviewed(
+                        productId,
+                        review.getId(),
+                        review.getVote(),
+                        review.getComment()
+                )
+        );
     }
 }
 ```
