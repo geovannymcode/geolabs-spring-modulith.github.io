@@ -785,7 +785,18 @@ class ProductCommandController {
             .created(URI.create("/api/products/" + id.id() + "/reviews/" + reviewId.id()))
             .body(reviewId);
     }
-    
+}
+```
+
+## DTOs
+
+Los DTOs han sido extraídos a sus propios archivos para mejorar la organización y mantenibilidad:
+
+```java
+
+// src/main/java/com/geovannycode/store/products/dto/command/CreateProductRequest.java
+package com.geovannycode.store.products.dto.command;
+
     // ===============================================
     // DTOs como records internos
     // ===============================================
@@ -810,7 +821,12 @@ class ProductCommandController {
         Integer stock,
         String category
     ) {}
-    
+```
+
+ ```java
+// src/main/java/com/geovannycode/store/products/dto/command/UpdateProductRequest.java
+package com.geovannycode.store.products.dto.command;
+
     /**
      * DTO para actualizar productos.
      * 
@@ -826,7 +842,11 @@ class ProductCommandController {
         Integer stock,
         String category
     ) {}
-    
+```
+
+```java
+// src/main/java/com/geovannycode/store/products/dto/command/AddReviewRequest.java
+package com.geovannycode.store.products.dto.command;
     /**
      * DTO para agregar reviews.
      * 
@@ -836,16 +856,18 @@ class ProductCommandController {
      * - URL es la fuente de verdad para el ID
      */
     record AddReviewRequest(Integer vote, String comment) {}
-}
 ```
 
 ### ¿Cómo maneja Spring las peticiones?
 
-1. **Petición HTTP llega** → `POST /api/products`
-2. **Spring busca** → Método con `@PostMapping` 
-3. **Convierte JSON** → A `CreateProductRequest`
-4. **Llama método** → `createProduct(request)`
-5. **Convierte respuesta** → De `ResponseEntity` a HTTP
+1. **Petición HTTP llega** → `POST /api/products` con un JSON en el cuerpo
+2. **Spring mapea la URL** → Encuentra el método con `@PostMapping` sin parámetros adicionales
+3. **Convierte el JSON** → Usa Jackson para crear un objeto `CreateProductRequest`
+4. **Llama al método** → Ejecuta `createProduct(request)` con el objeto convertido
+5. **Procesa la respuesta** → Convierte el `ResponseEntity<ProductIdentifier>` en una respuesta HTTP:
+   - Status: 201 Created
+   - Header: Location: /api/products/123
+   - Body: {"id":"123"} (o el formato que tenga ProductIdentifier)
 
 ## Lado Query - Modelos Optimizados para Lectura
 
