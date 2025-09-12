@@ -651,21 +651,39 @@ class ProductCommandService {
 
 ### ¿Qué hace un Controller?
 
-**Definición simple**: Recibe peticiones HTTP y devuelve respuestas HTTP  
-**Responsabilidad**: Ser la "cara" de tu aplicación hacia el mundo exterior  
-**Regla**: Delgado - solo convierte HTTP a llamadas de servicio
+**Definición**: Un Controller recibe peticiones HTTP del cliente (navegador, aplicación móvil, etc.) y devuelve respuestas HTTP apropiadas.
+
+**Responsabilidad:** Actúa como la "cara" de tu aplicación hacia el mundo exterior, siendo el punto de entrada para todas las interacciones externas.
+
+**Regla de oro:** Debe mantenerse "delgado" (thin) - su única responsabilidad es convertir peticiones HTTP en llamadas a servicios y transformar las respuestas de estos servicios en respuestas HTTP adecuadas.
 
 ### Conceptos importantes:
 
 #### ¿Qué son los DTOs (Data Transfer Objects)?
-**Definición simple**: Objetos que transportan datos entre capas  
-**¿Por qué como records internos?**: Son simples, inmutables y no necesitan archivo separado
 
-#### ¿Qué códigos HTTP usar?
-- **201 Created**: Cuando creas algo nuevo
-- **200 OK**: Cuando actualizas algo existente  
-- **204 No Content**: Cuando actualizas pero no devuelves datos
-- **404 Not Found**: Cuando no encuentras lo que buscan
+**Definición clara:** Los DTOs son objetos simples que empaquetan datos para transferirlos entre diferentes capas de la aplicación, como entre el cliente y el servidor. Actúan como contratos que definen exactamente qué datos se intercambian en cada operación.
+
+**¿Por qué usar records como DTOs?**
+
+- Son inmutables: una vez creados, no pueden modificarse
+- Proporcionan automáticamente: equals(), hashCode(), toString() y un constructor adecuado
+- Son concisos: requieren mucho menos código que clases tradicionales
+
+**¿Por qué definirlos como records internos?**
+
+- Encapsulación: están estrechamente relacionados con las operaciones del controlador
+- Organización: mantienes juntos el endpoint y los datos que espera recibir
+- Facilidad de mantenimiento: cuando cambias un endpoint, ves inmediatamente qué datos afecta
+
+### ¿Qué códigos HTTP usar?
+
+- **201 Created:** Cuando creas un nuevo recurso exitosamente
+- **200 OK:** Cuando obtienes o actualizas un recurso exitosamente y devuelves datos
+- **204 No Content:** Cuando la operación es exitosa pero no hay datos que devolver
+- **404 Not Found:** Cuando el recurso solicitado no existe
+- **400 Bad Request:** Cuando la petición contiene datos inválidos
+- **403 Forbidden:** Cuando el usuario no tiene permisos para acceder al recurso
+- **500 Internal Server Error:** Cuando ocurre un error inesperado en el servidor
 
 ### Implementación paso a paso
 
