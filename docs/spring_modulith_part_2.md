@@ -823,7 +823,7 @@ package com.geovannycode.store.products.dto.command;
     ) {}
 ```
 
- ```java
+```java
 // src/main/java/com/geovannycode/store/products/dto/command/UpdateProductRequest.java
 package com.geovannycode.store.products.dto.command;
 
@@ -865,23 +865,47 @@ package com.geovannycode.store.products.dto.command;
 3. **Convierte el JSON** → Usa Jackson para crear un objeto `CreateProductRequest`
 4. **Llama al método** → Ejecuta `createProduct(request)` con el objeto convertido
 5. **Procesa la respuesta** → Convierte el `ResponseEntity<ProductIdentifier>` en una respuesta HTTP:
-   - Status: 201 Created
-   - Header: Location: /api/products/123
-   - Body: {"id":"123"} (o el formato que tenga ProductIdentifier)
+      - Status: 201 Created
+      - Header: Location: /api/products/123
+      - Body: {"id":"123"} (o el formato que tenga ProductIdentifier)
 
-## Lado Query - Modelos Optimizados para Lectura
+## **Lado Query - Modelos Optimizados para Lectura**
 
 ### ¿Qué es el lado Query en CQRS?
 
-**Definición simple**: La parte que se especializa en leer datos rápidamente  
-**Diferencia con Command**: Optimizada para consultas, no para mantener consistencia  
-**Características**: Datos desnormalizados, sin validaciones complejas, solo lectura
+**Definición:** La parte especializada en proporcionar datos optimizados para lectura, diseñada para responder consultas de manera rápida y eficiente.
+
+**Diferencia con Command:**
+
+   - **Command:** Se enfoca en validar y procesar cambios manteniendo la consistencia del dominio
+   - **Query:** Se optimiza para leer datos rápidamente, sin preocuparse por validaciones complejas
+
+**Características principales:**
+
+- Utiliza modelos desnormalizados (datos redundantes)
+- Se optimiza para patrones de consulta específicos
+- Trabaja exclusivamente en modo lectura
+- Puede contener datos pre-calculados para evitar cálculos en tiempo real
+
+## Arquitectura del Lado Query
+
+En aplicaciones empresariales con CQRS, es recomendable seguir una arquitectura en capas:
+
+```
+Controller → Service → Repository
+     ↓
+    DTOs
+```
+
+Esta estructura permite una clara separación de responsabilidades y facilita el mantenimiento a largo plazo.
 
 ### ProductView - El Modelo de Lectura
 
-#### ¿Por qué ProductView y no usar Product directamente?
+#### ¿Por qué necesitamos un modelo separado?
 
-**Problema con usar Product para queries**:
+La principal razón es la **eficiencia en las consultas.** Usando un ejemplo concreto:
+
+**Problema con usar el modelo de dominio (Product) para consultas:**
 ```java
 // ❌ INEFICIENTE: Para mostrar productos con rating promedio
 public List<ProductSummary> getProductsWithRating() {
@@ -898,6 +922,12 @@ public List<ProductSummary> getProductsWithRating() {
 }
 ```
 
+Este enfoque tiene problemas:
+
+1. Carga TODOS los productos con sus reseñas en memoria
+2. Realiza cálculos para CADA producto cada vez que se consulta
+3. Se vuelve exponencialmente más lento con más productos y reseñas
+
 **Solución con ProductView**:
 ```java
 // ✅ RÁPIDO: Rating ya está calculado y guardado
@@ -905,6 +935,12 @@ public List<ProductView> getProductsByRating() {
     return repository.findAllOrderByRatingDesc(); // Una sola query SQL
 }
 ```
+
+Ventajas:
+
+1. Ejecuta una sola consulta SQL optimizada
+2. Los cálculos ya están hechos previamente
+3. Escala bien con grandes volúmenes de datos
 
 ### Implementación de ProductView
 
@@ -930,10 +966,6 @@ import java.math.BigDecimal;
  * - Nos da @Entity, @Table, @Id sin escribirlas manualmente
  * - Es agreggate desde perspectiva de queries, no de comandos
  * 
- * ¿Qué es @QueryModel?
- * - Marca esta clase como modelo de lectura en CQRS
- * - Documenta la intención del diseño
- * - Herramientas pueden usar esta información
  */
 @Getter                    // Getters para todos los campos
 @Setter                    // Setters normales para campos básicos
@@ -983,22 +1015,42 @@ class ProductView implements AggregateRoot<ProductView, ProductIdentifier> {
 }
 ```
 
+#### Explicación:
+
+1. **@QueryModel:** Esta anotación de jMolecules marca la clase como un modelo específico para consultas en CQRS. Es principalmente documentativa.
+
+2. **AggregateRoot:** Aunque normalmente se asocia con el lado Command, aquí se implementa porque jMolecules lo utiliza para generar automáticamente las anotaciones JPA (@Entity, @Table, @Id).
+
+3. **Campos desnormalizados:**
+      - `averageRating`: Almacena el promedio de calificaciones pre-calculado
+      - `reviewCount`: Guarda la cantidad de reseñas para no tener que contarlas
+
+4. **Método on(ProductReviewed):**
+      - Implementa un cálculo incremental del promedio
+      - Evita tener que recalcular desde cero cada vez
+      - Es mucho más eficiente (O(1) vs O(n)) que recalcular con todas las reseñas
+  
 ## ProductEventHandler - Sincronización Asíncrona
+
+Esta clase es crucial para mantener actualizado el modelo de lectura basado en eventos del lado Command.
 
 ### ¿Qué es @ApplicationModuleListener?
 
-**Definición simple**: Escucha eventos de otros módulos y reacciona asíncronamente
+**Definición**: Es una anotación de Spring Modulith que marca un método para escuchar eventos de otros módulos y procesarlos de forma asíncrona.
 
-**¿Cómo funciona?**
-1. CommandService publica `ProductCreated`
-2. Spring Modulith encuentra este método
-3. Lo ejecuta **en otra transacción**
-4. Si falla, puede reintentar después
+### Flujo completo:
 
-**¿Por qué asíncrono?**
-- El comando no se bloquea esperando las actualizaciones de query
-- Si falla el query, no afecta al comando
-- Mejor performance del sistema
+1. Un `CommandService` publica un evento (ej: `ProductCreated`)
+2. Spring Modulith detecta este evento y busca métodos anotados con `@ApplicationModuleListener`
+3. Ejecuta el método correspondiente en una **transacción separada**
+4. Si el procesamiento falla, puede reintentar automáticamente más tarde
+
+### Ventajas de este enfoque asíncrono:
+
+- **Desacoplamiento:** El comando completa sin esperar a que se actualice la vista
+- **Resiliencia:** Si falla la actualización de la vista, el comando ya está confirmado
+- **Rendimiento:** No se bloquea la respuesta al usuario mientras se actualizan las vistas
+- **Escalabilidad:** Permite escalar independientemente los lados de comando y consulta
 
 ### Implementación paso a paso
 
@@ -1106,14 +1158,18 @@ class ProductEventHandler {
 
 ### ¿Qué pasa si falla un evento?
 
-1. **Spring Modulith guarda el evento** en la tabla `event_publication`
-2. **Al reiniciar la aplicación** republica eventos pendientes
-3. **Puedes configurar retry** con backoff exponencial
-4. **Eventos archivados** van a `event_publication_archive` para auditoría
+Spring Modulith implementa un mecanismo robusto para garantizar la consistencia eventual:
+
+1. Guarda el evento en la tabla `event_publication` de la base de datos
+2. Al reiniciar la aplicación, intenta republicar automáticamente los eventos pendientes
+3. Se puede configurar estrategias de reintento con backoff exponencial
+4. Los eventos procesados exitosamente se mueven a `event_publication_archive` para auditoría
 
 ## Repository de Query - Consultas Optimizadas
 
 ### ¿Por qué métodos de query específicos?
+
+Comparemos una consulta genérica con una específica:
 
 **Ejemplo de query genérica vs específica**:
 
@@ -1191,6 +1247,78 @@ interface ProductViewRepository extends ListCrudRepository<ProductView, ProductI
      */
     @Query("SELECT pv FROM ProductView pv WHERE pv.reviewCount > 0 ORDER BY pv.averageRating DESC")
     List<ProductView> findAllOrderByRatingDesc();
+}
+```
+
+### 1. Crear interfaz del servicio
+
+```java
+// src/main/java/com/geovannycode/store/products/query/ProductQueryService.java
+package com.geovannycode.store.products.query;
+
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Servicio para consultas de productos.
+ */
+public interface ProductQueryService {
+    List<ProductView> findAllProducts();
+    Optional<ProductView> findProductById(ProductIdentifier id);
+    List<ProductView> findProductsByCategory(String category);
+    List<ProductView> findProductsByPriceRange(BigDecimal min, BigDecimal max);
+    List<ProductView> findProductsOrderedByRating();
+}
+```
+
+### 2. Implementar el servicio
+
+```java
+// src/main/java/com/geovannycode/store/products/query/ProductQueryServiceImpl.java
+package com.geovannycode.store.products.query;
+
+import com.geovannycode.store.products.command.Product.ProductIdentifier;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+class ProductQueryServiceImpl implements ProductQueryService {
+    
+    private final ProductViewRepository repository;
+    
+    @Override
+    public List<ProductView> findAllProducts() {
+        return repository.findAll();
+    }
+    
+    @Override
+    public Optional<ProductView> findProductById(ProductIdentifier id) {
+        return repository.findById(id);
+    }
+    
+    @Override
+    public List<ProductView> findProductsByCategory(String category) {
+        return repository.findByCategory(category);
+    }
+    
+    @Override
+    public List<ProductView> findProductsByPriceRange(BigDecimal min, BigDecimal max) {
+        return repository.findByPriceRange(min, max);
+    }
+    
+    @Override
+    public List<ProductView> findProductsOrderedByRating() {
+        return repository.findAllOrderByRatingDesc();
+    }
 }
 ```
 
