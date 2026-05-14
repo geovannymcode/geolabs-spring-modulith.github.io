@@ -1,56 +1,58 @@
-site_name: "GeoLabs Workshop-Spring-Modulith"
-site_description: "GeoLabs Workshop-Spring-Modulith Docs"
-site_author: "Geovanny Mendoza"
-site_url: "https://github.com/geovannymcode/geolabs-spring-modulith.github.io/"
+site_name: "Workshop: Monolito Modular Real con Spring Modulith"
+site_description: "De un monolito acoplado a una arquitectura modular de producción"
+site_author: "Geovanny Mendoza — BarranquillaJUG"
+site_url: "https://geolabs-spring-modulith.github.io"
 
-# Repository
-repo_name: "/geovannymcode/geolabs-spring-modulith.github.io"
-repo_url: "https://geovannymcode.github.io/geolabs-spring-modulith.github.io"
-
-# Copyright
-copyright: "Copyright &copy; 2025 Geovanny Mendoza"
+repo_name: "geovannymcode/bookstore-modulith"
+repo_url: "https://github.com/geovannymcode/bookstore-modulith"
 
 theme:
   name: material
-nav:
-  #- Inicio: index.md
-  - Spring Modulith Parte 1: spring_modulith_part_1.md
-  - Spring Modulith Parte 2: spring_modulith_part_2.md
-  - Spring Modulith Parte 3: spring_modulith_part_3.md
-  - Rerencias: references.md
+  language: es
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
 
-# Customization
-extra:
-  manifest: "manifest.webmanifest"
-  social:
-    - icon: fontawesome/brands/github-alt
-      link: "https://github.com/geovannymcode"
-    - icon: fontawesome/brands/twitter
-      link: "https://twitter.com/geovannycode"
-    - icon: fontawesome/brands/linkedin
-      link: "https://www.linkedin.com/in/geovannycode/"
-
-# Extensions
 markdown_extensions:
-  - codehilite
-  - tables
-  - pymdownx.tasklist:
-      custom_checkbox: true
-      clickable_checkbox: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
   - pymdownx.highlight:
       anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - attr_list
-  - pymdownx.emoji:
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - tables
+  - toc:
+      permalink: true
 
-
-# Tables
-extra_javascript:
-  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js
-  - javascripts/tablesort.js
+nav:
+  - Inicio: index.md
+  - Partes del Workshop:
+    - "Parte 0 — El Antes": parte_0.md
+    - "Parte 1 — Migración y Setup": parte_1.md
+    - "Parte 2 — Boundaries y Reglas": parte_2.md
+    - "Parte 3 — CQRS en Módulos": parte_3.md
+    - "Parte 4 — Eventos y Outbox": parte_4.md
+    - "Parte 5 — Testing en Aislamiento": parte_5.md
+    - "Parte 6 — C4 Docs y Producción": parte_6.md
+  - Referencias: referencias.md
