@@ -1,0 +1,1914 @@
+
+<!doctype html>
+<html lang="es" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="De un monolito acoplado a una arquitectura modular de producción">
+      
+      
+        <meta name="author" content="Geovanny Mendoza — BarranquillaJUG">
+      
+      
+        <link rel="canonical" href="https://geolabs-spring-modulith.github.io/parte_1/">
+      
+      
+        <link rel="prev" href="../parte_0/">
+      
+      
+        <link rel="next" href="../parte_2/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Parte 1 — Migración y Setup - Workshop: Monolito Modular Real con Spring Modulith</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#parte-1-migracion-a-package-by-feature-y-setup-de-spring-modulith" class="md-skip">
+          Saltar a contenido
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabecera">
+    <a href=".." title="Workshop: Monolito Modular Real con Spring Modulith" class="md-header__button md-logo" aria-label="Workshop: Monolito Modular Real con Spring Modulith" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Workshop: Monolito Modular Real con Spring Modulith
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Parte 1 — Migración y Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo oscuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo oscuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Cambiar a modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Cambiar a modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Búsqueda" placeholder="Búsqueda" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Buscar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpiar" aria-label="Limpiar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando búsqueda
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/geovannymcode/bookstore-modulith" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    geovannymcode/bookstore-modulith
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Pestañas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Inicio
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../parte_0/" class="md-tabs__link">
+          
+  
+  
+  Partes del Workshop
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../referencias/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Referencias
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navegación" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Workshop: Monolito Modular Real con Spring Modulith" class="md-nav__button md-logo" aria-label="Workshop: Monolito Modular Real con Spring Modulith" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Workshop: Monolito Modular Real con Spring Modulith
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/geovannymcode/bookstore-modulith" title="Ir al repositorio" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    geovannymcode/bookstore-modulith
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Inicio
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Partes del Workshop
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Partes del Workshop
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 0 — El Antes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 1 — Migración y Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 1 — Migración y Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Tabla de contenidos">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Tabla de contenidos
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#que-hacemos-aqui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué hacemos aquí?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#que-es-un-modulo-en-spring-modulith" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué es un módulo en Spring Modulith?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#la-estructura-objetivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        La estructura objetivo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-1-crear-los-directorios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 1: Crear los directorios
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-2-mover-las-clases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 2: Mover las clases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-3-limpiar-orderrestcontroller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 3: Limpiar OrderRestController
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paso 3: Limpiar OrderRestController">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#por-que-eliminarlo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Por qué eliminarlo?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-4-flywayconfig-el-fix-de-spring-boot-4x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 4: FlywayConfig — el fix de Spring Boot 4.x
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paso 4: FlywayConfig — el fix de Spring Boot 4.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cual-es-el-problema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Cuál es el problema?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#la-solucion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        La solución
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actualizar-applicationproperties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actualizar application.properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-5-dividir-el-globalexceptionhandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 5: Dividir el GlobalExceptionHandler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-6-agregar-spring-modulith-al-pomxml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 6: Agregar Spring Modulith al pom.xml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-7-crear-los-package-infojava" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 7: Crear los package-info.java
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paso 7: Crear los package-info.java">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commonpackage-infojava" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        common/package-info.java
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orderspackage-infojava" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orders/package-info.java
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inventorypackage-infojava" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        inventory/package-info.java
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-8-crear-el-dto-publico-productjava" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 8: Crear el DTO público Product.java
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-9-crear-catalogapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 9: Crear CatalogApi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-10-actualizar-orderservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 10: Actualizar OrderService
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-11-crear-el-modularitytest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 11: Crear el ModularityTest
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paso 11: Crear el ModularityTest">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ejecutar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejecutar
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#paso-12-leer-y-resolver-las-violaciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Paso 12: Leer y resolver las violaciones
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Paso 12: Leer y resolver las violaciones">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#violacion-ciclo-orders-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Violación: ciclo orders ↔ inventory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#violacion-orders-usa-common-sin-declararlo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Violación: orders usa common sin declararlo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#violacion-orders-accede-a-productentity-tipo-interno" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Violación: orders accede a ProductEntity (tipo interno)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ejecutar-el-test-de-nuevo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ejecutar el test de nuevo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#que-significa-que-el-test-pase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ¿Qué significa que el test pase?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resumen-de-conceptos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resumen de conceptos
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 2 — Boundaries y Reglas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 3 — CQRS en Módulos
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 4 — Eventos y Outbox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_5/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 5 — Testing en Aislamiento
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parte_6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parte 6 — C4 Docs y Producción
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../referencias/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Referencias
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="parte-1-migracion-a-package-by-feature-y-setup-de-spring-modulith">Parte 1 — Migración a Package-by-Feature y Setup de Spring Modulith<a class="headerlink" href="#parte-1-migracion-a-package-by-feature-y-setup-de-spring-modulith" title="Permanent link">&para;</a></h1>
+<p><strong>Duración</strong>: 30 minutos<br />
+<strong>Objetivo</strong>: Reorganizar el código, configurar Flyway, agregar Spring Modulith y hacer pasar el primer <code>ModularityTest</code></p>
+<hr />
+<h2 id="que-hacemos-aqui">¿Qué hacemos aquí?<a class="headerlink" href="#que-hacemos-aqui" title="Permanent link">&para;</a></h2>
+<p>Tres movimientos en esta parte:</p>
+<ol>
+<li>Reorganizar el código de package-by-layer a <strong>package-by-feature</strong></li>
+<li>Configurar Flyway correctamente para Spring Boot 4.x</li>
+<li>Agregar Spring Modulith, ejecutar el primer <code>ModularityTest</code> y resolver cada violación que encuentre</li>
+</ol>
+<p>El test va a fallar la primera vez. Varias veces, de hecho. Eso es lo que queremos — cada error es un mensaje claro de qué está mal y dónde.</p>
+<hr />
+<h2 id="que-es-un-modulo-en-spring-modulith">¿Qué es un módulo en Spring Modulith?<a class="headerlink" href="#que-es-un-modulo-en-spring-modulith" title="Permanent link">&para;</a></h2>
+<p>Un módulo es cualquier <strong>paquete directo</strong> bajo el paquete raíz de tu aplicación. Nada más — no hay XML, no hay anotación especial, no hay configuración adicional.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>com.geovannycode.bookstore/      ← paquete raíz
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── catalog/                     ← MÓDULO
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── orders/                      ← MÓDULO
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── inventory/                   ← MÓDULO
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── common/                      ← MÓDULO
+</code></pre></div>
+<p>Los sub-paquetes dentro de cada módulo (<code>catalog/command/</code>, <code>catalog/web/</code>) son <strong>internos</strong> al módulo — privados por defecto. Ningún otro módulo puede acceder a lo que hay ahí, aunque las clases sean <code>public</code> en Java.</p>
+<div class="admonition tip">
+<p class="admonition-title">La visibilidad de módulo va más allá de Java</p>
+<p>Java controla visibilidad con <code>public</code>, <code>protected</code>, <code>private</code>. Spring Modulith agrega una capa más: <strong>visibilidad de módulo</strong>. Una clase puede ser <code>public</code> en Java y ser invisible para otros módulos si está en un sub-paquete.</p>
+<p>Esto nos permite decir: "<code>ProductEntity</code> es pública dentro de <code>catalog</code>, pero invisible para <code>orders</code>". Sin esa distinción, tendríamos que hacer todo <code>package-private</code> en Java — lo cual es imposible de mantener en un monolito grande.</p>
+</div>
+<hr />
+<h2 id="la-estructura-objetivo">La estructura objetivo<a class="headerlink" href="#la-estructura-objetivo" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>com.geovannycode.bookstore/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── BookstoreApplication.java
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├── config/
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── FlywayConfig.java          ← NUEVO — necesario en Spring Boot 4.x
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   └── RabbitMQConfig.java
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>├── common/
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   ├── package-info.java          ← NUEVO — declara el módulo como OPEN
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   └── models/
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│       └── PagedResult.java
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>├── catalog/
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   ├── CatalogApi.java            ← NUEVO — API pública del módulo
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   ├── Product.java               ← NUEVO — DTO público (nunca exponer ProductEntity)
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   ├── command/                   ← sub-paquete privado
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   │   ├── ProductEntity.java
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   │   ├── ProductRepository.java
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   │   ├── ProductCommandService.java
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│   │   ├── CreateProductCommand.java
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│   │   ├── ProductNotFoundException.java
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│   │   └── ProductAlreadyExistsException.java
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│   └── web/                       ← sub-paquete privado
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│       ├── ProductRestController.java
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│       └── CatalogExceptionHandler.java
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>├── orders/
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│   ├── package-info.java          ← NUEVO — declara dependencias permitidas
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│   ├── OrderCreatedEvent.java     ← en la RAÍZ del módulo (evento público)
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│   ├── domain/                    ← sub-paquete privado
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   │   ├── OrderService.java
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   │   ├── OrderEntity.java
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   │   ├── OrderRepository.java
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   │   ├── CreateOrderRequest.java
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   │   ├── CreateOrderResponse.java
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│   │   ├── OrderStatus.java
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│   │   ├── OrderNotFoundException.java
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│   │   └── InvalidOrderException.java
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│   └── web/                       ← sub-paquete privado
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│       ├── OrderRestController.java
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│       └── OrdersExceptionHandler.java
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>└── inventory/
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    ├── package-info.java          ← NUEVO — módulo sin dependencias externas
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>    ├── InventoryEntity.java
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    ├── InventoryRepository.java
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    ├── InventoryService.java
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    └── OrderEventsInventoryHandler.java
+</code></pre></div>
+<hr />
+<h2 id="paso-1-crear-los-directorios">Paso 1: Crear los directorios<a class="headerlink" href="#paso-1-crear-los-directorios" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span>src/main/java/com/geovannycode/bookstore
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>common/models
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>catalog/<span class="o">{</span>command,web<span class="o">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>orders/<span class="o">{</span>domain,web<span class="o">}</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>inventory
+</code></pre></div>
+<hr />
+<h2 id="paso-2-mover-las-clases">Paso 2: Mover las clases<a class="headerlink" href="#paso-2-mover-las-clases" title="Permanent link">&para;</a></h2>
+<p>Mueve cada clase a su nuevo paquete y actualiza la declaración <code>package</code> en la primera línea de cada archivo. IntelliJ puede hacer este refactor automáticamente con clic derecho → Refactor → Move.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">common/</label><label for="__tabbed_1_2">catalog/command/</label><label for="__tabbed_1_3">catalog/web/</label><label for="__tabbed_1_4">orders/</label><label for="__tabbed_1_5">inventory/</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>models/PagedResult.java  →  common/models/PagedResult.java
+</code></pre></div>
+Cambiar:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.models</span><span class="p">;</span>
+</code></pre></div>
+Por:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.common.models</span><span class="p">;</span>
+</code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>entities/ProductEntity.java              →  catalog/command/ProductEntity.java
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>repositories/ProductRepository.java      →  catalog/command/ProductRepository.java
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>services/ProductService.java             →  catalog/command/ProductCommandService.java
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>models/CreateProductRequest.java         →  catalog/command/CreateProductCommand.java
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>exceptions/ProductNotFoundException.java →  catalog/command/ProductNotFoundException.java
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>exceptions/ProductAlreadyExistsException →  catalog/command/ProductAlreadyExistsException.java
+</code></pre></div>
+<p>Renombra <code>ProductService</code> → <code>ProductCommandService</code> en nombre de clase y nombre de archivo.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>web/ProductRestController.java  →  catalog/web/ProductRestController.java
+</code></pre></div>
+<p>El <code>GlobalExceptionHandler</code> no lo muevas — lo dividimos en el Paso 5.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>models/OrderCreatedEvent.java     →  orders/OrderCreatedEvent.java   ← raíz del módulo
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>entities/OrderEntity.java         →  orders/domain/OrderEntity.java
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>repositories/OrderRepository.java →  orders/domain/OrderRepository.java
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>services/OrderService.java        →  orders/domain/OrderService.java
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>models/CreateOrderRequest.java    →  orders/domain/CreateOrderRequest.java
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>models/CreateOrderResponse.java   →  orders/domain/CreateOrderResponse.java
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>models/OrderStatus.java           →  orders/domain/OrderStatus.java
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>exceptions/OrderNotFoundException →  orders/domain/OrderNotFoundException.java
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>exceptions/InvalidOrderException  →  orders/domain/InvalidOrderException.java
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>web/OrderRestController.java      →  orders/web/OrderRestController.java
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>entities/InventoryEntity.java              →  inventory/InventoryEntity.java
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>repositories/InventoryRepository.java       →  inventory/InventoryRepository.java
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>services/InventoryService.java             →  inventory/InventoryService.java
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>services/OrderEventsInventoryHandler.java  →  inventory/OrderEventsInventoryHandler.java
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">OrderCreatedEvent va en la raíz de orders/, no en domain/</p>
+<p>Este es el error más común. <code>OrderCreatedEvent</code> debe estar en <code>orders/</code> directamente — no en <code>orders/domain/</code>. La raíz del módulo es la API pública: lo que vive ahí es visible para todos los módulos. Lo que está en sub-paquetes es privado.</p>
+<p>El módulo <code>inventory</code> necesita escuchar <code>OrderCreatedEvent</code>. Si el evento está en <code>orders/domain/</code>, Spring Modulith lo tratará como un tipo interno y el handler de inventory generará una violación.</p>
+<p>Verifica que quedó bien:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>find<span class="w"> </span>src<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;OrderCreatedEvent.java&quot;</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="c1"># Debe mostrar: .../bookstore/orders/OrderCreatedEvent.java</span>
+</code></pre></div></p>
+</div>
+<hr />
+<h2 id="paso-3-limpiar-orderrestcontroller">Paso 3: Limpiar OrderRestController<a class="headerlink" href="#paso-3-limpiar-orderrestcontroller" title="Permanent link">&para;</a></h2>
+<p>El <code>OrderRestController</code> del starter tiene un método que hay que eliminar antes de seguir:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// ELIMINA este método de OrderRestController</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nd">@GetMapping</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">PagedResult</span><span class="o">&lt;</span><span class="n">OrderEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getAll</span><span class="p">(</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">        </span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="nd">@RequestParam</span><span class="p">(</span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;10&quot;</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">orderService</span><span class="p">.</span><span class="na">getAll</span><span class="p">(</span><span class="n">page</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">);</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">}</span>
+</code></pre></div>
+<p>Y el método correspondiente en <code>OrderService</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1">// ELIMINA también este método de OrderService</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nd">@Transactional</span><span class="p">(</span><span class="n">readOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="kd">public</span><span class="w"> </span><span class="n">PagedResult</span><span class="o">&lt;</span><span class="n">OrderEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getAll</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">page</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="n">pageable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PageRequest</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">            </span><span class="n">Math</span><span class="p">.</span><span class="na">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">page</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">size</span><span class="p">,</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">            </span><span class="n">Sort</span><span class="p">.</span><span class="na">by</span><span class="p">(</span><span class="n">Sort</span><span class="p">.</span><span class="na">Direction</span><span class="p">.</span><span class="na">DESC</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;createdAt&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">PagedResult</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">orderRepository</span><span class="p">.</span><span class="na">findAll</span><span class="p">(</span><span class="n">pageable</span><span class="p">));</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="por-que-eliminarlo">¿Por qué eliminarlo?<a class="headerlink" href="#por-que-eliminarlo" title="Permanent link">&para;</a></h3>
+<p>Hay dos razones.</p>
+<p>La primera es de diseño. <code>OrderEntity</code> es la entidad JPA del módulo <code>orders</code> — tiene su ID de base de datos, sus timestamps de Hibernate, sus anotaciones de persistencia. Exponer eso directamente desde un endpoint REST mezcla la capa de persistencia con la capa de presentación. Si mañana cambias el nombre de un campo en la base de datos, el contrato del API cambia también. Son dos cosas que deberían poder evolucionar independientemente.</p>
+<p>La segunda es de consistencia con la arquitectura que estamos construyendo. En la Parte 3 vamos a agregar CQRS al módulo <code>catalog</code>, que separa explícitamente el modelo de escritura (entidades JPA) del modelo de lectura (vistas optimizadas para consultas). En la Parte 5 veremos cómo testear estos módulos en aislamiento. Tener un endpoint que retorna <code>OrderEntity</code> directamente va en contra de ese diseño.</p>
+<div class="admonition info">
+<p class="admonition-title">¿Dónde queda la consulta de órdenes entonces?</p>
+<p>En la Parte 5 del workshop, cuando implementemos los tests, agregaremos un <code>OrderView</code> como DTO de lectura y un endpoint <code>GET /api/orders/{orderNumber}</code> que lo use. Por ahora los endpoints que necesitas para seguir el workshop son <code>POST /api/orders</code> (crear orden) y <code>GET /api/orders/{orderNumber}</code> (obtener por número).</p>
+<p>El <code>OrderRestController</code> que queda después de la limpieza:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nd">@RestController</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&quot;/api/orders&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="kd">class</span> <span class="nc">OrderRestController</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">OrderService</span><span class="w"> </span><span class="n">orderService</span><span class="p">;</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">    </span><span class="n">OrderRestController</span><span class="p">(</span><span class="n">OrderService</span><span class="w"> </span><span class="n">orderService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">orderService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderService</span><span class="p">;</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">    </span><span class="nd">@PostMapping</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">    </span><span class="nd">@ResponseStatus</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">CREATED</span><span class="p">)</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="n">CreateOrderResponse</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="nd">@Valid</span><span class="w"> </span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">CreateOrderRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">orderService</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">request</span><span class="p">);</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/{orderNumber}&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">    </span><span class="n">OrderEntity</span><span class="w"> </span><span class="nf">getByOrderNumber</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">orderNumber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">orderService</span><span class="p">.</span><span class="na">getByOrderNumber</span><span class="p">(</span><span class="n">orderNumber</span><span class="p">);</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+<hr />
+<h2 id="paso-4-flywayconfig-el-fix-de-spring-boot-4x">Paso 4: FlywayConfig — el fix de Spring Boot 4.x<a class="headerlink" href="#paso-4-flywayconfig-el-fix-de-spring-boot-4x" title="Permanent link">&para;</a></h2>
+<h3 id="cual-es-el-problema">¿Cuál es el problema?<a class="headerlink" href="#cual-es-el-problema" title="Permanent link">&para;</a></h3>
+<p>En Spring Boot 4.x con <code>spring-boot-docker-compose</code> activo, el orden de inicialización cambió. Lo que pasa es:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>1. Spring Boot detecta compose.yml y levanta los contenedores
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>2. Spring configura el datasource usando las credenciales del compose.yml
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>3. JPA intenta inicializar el EntityManagerFactory
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>4. Hibernate valida que las tablas existan → ERROR: relation &quot;orders&quot; does not exist
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>5. Flyway nunca tuvo oportunidad de correr las migraciones
+</code></pre></div>
+<p>El error parece un problema de configuración pero es un problema de orden de inicialización.</p>
+<h3 id="la-solucion">La solución<a class="headerlink" href="#la-solucion" title="Permanent link">&para;</a></h3>
+<p>Al registrar Flyway como <code>@Bean</code> explícito con <code>initMethod = "migrate"</code>, Spring garantiza que las migraciones corren antes de que cualquier bean que use el <code>DataSource</code> — incluido el <code>EntityManagerFactory</code> de JPA — sea inicializado.</p>
+<p>Crea <code>config/FlywayConfig.java</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.config</span><span class="p">;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.flywaydb.core.Flyway</span><span class="p">;</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.context.annotation.Bean</span><span class="p">;</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.context.annotation.Configuration</span><span class="p">;</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">javax.sql.DataSource</span><span class="p">;</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="cm">/**</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="cm"> * Configuración manual de Flyway para Spring Boot 4.x.</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="cm"> *</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="cm"> * En Boot 3.x, Flyway se autoconfigura y corre antes que JPA sin hacer nada.</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="cm"> * En Boot 4.x ese orden cambió cuando spring-boot-docker-compose está activo.</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="cm"> * Este bean fuerza que Flyway migre antes de que el EntityManagerFactory</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="cm"> * intente validar el schema.</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="cm"> */</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="nd">@Configuration</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">FlywayConfig</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a>
+<a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="w">    </span><span class="nd">@Bean</span><span class="p">(</span><span class="n">initMethod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;migrate&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Flyway</span><span class="w"> </span><span class="nf">flyway</span><span class="p">(</span><span class="n">DataSource</span><span class="w"> </span><span class="n">dataSource</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Flyway</span><span class="p">.</span><span class="na">configure</span><span class="p">()</span>
+<a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a><span class="w">                </span><span class="p">.</span><span class="na">dataSource</span><span class="p">(</span><span class="n">dataSource</span><span class="p">)</span>
+<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a><span class="w">                </span><span class="p">.</span><span class="na">locations</span><span class="p">(</span><span class="s">&quot;classpath:db/migration&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a><span class="w">                </span><span class="p">.</span><span class="na">load</span><span class="p">();</span>
+<a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="actualizar-applicationproperties">Actualizar application.properties<a class="headerlink" href="#actualizar-applicationproperties" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># FlywayConfig.java se encarga de esto — desactivamos la autoconfiguración</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="na">spring.flyway.enabled</span><span class="o">=</span><span class="s">false</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Spring Boot 3.x</p>
+<p>Si usas Spring Boot 3.x, elimina <code>FlywayConfig.java</code> y cambia la propiedad a <code>spring.flyway.enabled=true</code>. La autoconfiguración de Boot 3.x funciona bien sin intervención.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">¿Por qué no usar spring.jpa.defer-datasource-initialization?</p>
+<p>Esa propiedad existe en Boot 3.x y resuelve un problema similar pero diferente. En Boot 4.x con docker-compose activo no es confiable. El bean explícito es más directo y predecible — Spring no puede reordenar la inicialización de un bean que ya tiene <code>initMethod</code>.</p>
+</div>
+<hr />
+<h2 id="paso-5-dividir-el-globalexceptionhandler">Paso 5: Dividir el GlobalExceptionHandler<a class="headerlink" href="#paso-5-dividir-el-globalexceptionhandler" title="Permanent link">&para;</a></h2>
+<p>El <code>GlobalExceptionHandler</code> del starter conoce las excepciones de todos los dominios en un solo archivo. Si en el futuro extraes <code>catalog</code> como un servicio separado, ¿qué pasa con <code>ProductNotFoundException</code> que sigue en ese handler monolítico?</p>
+<p>La solución: cada módulo maneja sus propias excepciones. <code>basePackages</code> en <code>@RestControllerAdvice</code> garantiza que el handler solo intercepta errores que vienen de ese módulo.</p>
+<p><strong>Elimina</strong> <code>GlobalExceptionHandler.java</code>.</p>
+<p><strong>Crea</strong> <code>catalog/web/CatalogExceptionHandler.java</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.web</span><span class="p">;</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.command.ProductNotFoundException</span><span class="p">;</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.command.ProductAlreadyExistsException</span><span class="p">;</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.http.HttpStatus</span><span class="p">;</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.http.ProblemDetail</span><span class="p">;</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.ExceptionHandler</span><span class="p">;</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.RestControllerAdvice</span><span class="p">;</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</span><span class="p">;</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.time.Instant</span><span class="p">;</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="nd">@RestControllerAdvice</span><span class="p">(</span><span class="n">basePackages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;com.geovannycode.bookstore.catalog&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="kd">class</span> <span class="nc">CatalogExceptionHandler</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ResponseEntityExceptionHandler</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">ProductNotFoundException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">    </span><span class="n">ProblemDetail</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">ProductNotFoundException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProblemDetail</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">                </span><span class="p">.</span><span class="na">forStatusAndDetail</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">NOT_FOUND</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setTitle</span><span class="p">(</span><span class="s">&quot;Producto no encontrado&quot;</span><span class="p">);</span>
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">&quot;timestamp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">problem</span><span class="p">;</span>
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a>
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">ProductAlreadyExistsException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="w">    </span><span class="n">ProblemDetail</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">ProductAlreadyExistsException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProblemDetail</span>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="w">                </span><span class="p">.</span><span class="na">forStatusAndDetail</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">CONFLICT</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setTitle</span><span class="p">(</span><span class="s">&quot;Producto ya existe&quot;</span><span class="p">);</span>
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">&quot;timestamp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">problem</span><span class="p">;</span>
+<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Crea</strong> <code>orders/web/OrdersExceptionHandler.java</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders.web</span><span class="p">;</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders.domain.OrderNotFoundException</span><span class="p">;</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders.domain.InvalidOrderException</span><span class="p">;</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.http.HttpStatus</span><span class="p">;</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.http.ProblemDetail</span><span class="p">;</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.ExceptionHandler</span><span class="p">;</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.RestControllerAdvice</span><span class="p">;</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</span><span class="p">;</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.time.Instant</span><span class="p">;</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="nd">@RestControllerAdvice</span><span class="p">(</span><span class="n">basePackages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;com.geovannycode.bookstore.orders&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="kd">class</span> <span class="nc">OrdersExceptionHandler</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">ResponseEntityExceptionHandler</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">OrderNotFoundException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">    </span><span class="n">ProblemDetail</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">OrderNotFoundException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProblemDetail</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">                </span><span class="p">.</span><span class="na">forStatusAndDetail</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">NOT_FOUND</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setTitle</span><span class="p">(</span><span class="s">&quot;Orden no encontrada&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">&quot;timestamp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">problem</span><span class="p">;</span>
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">    </span><span class="nd">@ExceptionHandler</span><span class="p">(</span><span class="n">InvalidOrderException</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="w">    </span><span class="n">ProblemDetail</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">InvalidOrderException</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ProblemDetail</span>
+<a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">                </span><span class="p">.</span><span class="na">forStatusAndDetail</span><span class="p">(</span><span class="n">HttpStatus</span><span class="p">.</span><span class="na">BAD_REQUEST</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span>
+<a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setTitle</span><span class="p">(</span><span class="s">&quot;Orden inválida&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">        </span><span class="n">problem</span><span class="p">.</span><span class="na">setProperty</span><span class="p">(</span><span class="s">&quot;timestamp&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">());</span>
+<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">problem</span><span class="p">;</span>
+<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="paso-6-agregar-spring-modulith-al-pomxml">Paso 6: Agregar Spring Modulith al pom.xml<a class="headerlink" href="#paso-6-agregar-spring-modulith-al-pomxml" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">&lt;properties&gt;</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="nt">&lt;java.version&gt;</span>25<span class="nt">&lt;/java.version&gt;</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="nt">&lt;spring-modulith.version&gt;</span>1.3.1<span class="nt">&lt;/spring-modulith.version&gt;</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nt">&lt;/properties&gt;</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nt">&lt;dependencyManagement&gt;</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="nt">&lt;dependencies&gt;</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">        </span><span class="nt">&lt;dependency&gt;</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">            </span><span class="nt">&lt;groupId&gt;</span>org.springframework.modulith<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">            </span><span class="nt">&lt;artifactId&gt;</span>spring-modulith-bom<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">            </span><span class="nt">&lt;version&gt;</span>${spring-modulith.version}<span class="nt">&lt;/version&gt;</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">            </span><span class="nt">&lt;type&gt;</span>pom<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">            </span><span class="nt">&lt;scope&gt;</span>import<span class="nt">&lt;/scope&gt;</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">        </span><span class="nt">&lt;/dependency&gt;</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">    </span><span class="nt">&lt;/dependencies&gt;</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="nt">&lt;/dependencyManagement&gt;</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="nt">&lt;dependencies&gt;</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">    </span><span class="cm">&lt;!-- ... dependencias existentes ... --&gt;</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="w">    </span><span class="cm">&lt;!-- Modularidad, verificación de boundaries, endpoint /actuator/modulith --&gt;</span>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">    </span><span class="nt">&lt;dependency&gt;</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">        </span><span class="nt">&lt;groupId&gt;</span>org.springframework.modulith<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">        </span><span class="nt">&lt;artifactId&gt;</span>spring-modulith-starter-core<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">    </span><span class="nt">&lt;/dependency&gt;</span>
+<a id="__codelineno-19-26" name="__codelineno-19-26" href="#__codelineno-19-26"></a>
+<a id="__codelineno-19-27" name="__codelineno-19-27" href="#__codelineno-19-27"></a><span class="w">    </span><span class="cm">&lt;!-- @ApplicationModuleTest, AssertablePublishedEvents, Scenario --&gt;</span>
+<a id="__codelineno-19-28" name="__codelineno-19-28" href="#__codelineno-19-28"></a><span class="w">    </span><span class="nt">&lt;dependency&gt;</span>
+<a id="__codelineno-19-29" name="__codelineno-19-29" href="#__codelineno-19-29"></a><span class="w">        </span><span class="nt">&lt;groupId&gt;</span>org.springframework.modulith<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-19-30" name="__codelineno-19-30" href="#__codelineno-19-30"></a><span class="w">        </span><span class="nt">&lt;artifactId&gt;</span>spring-modulith-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-19-31" name="__codelineno-19-31" href="#__codelineno-19-31"></a><span class="w">        </span><span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+<a id="__codelineno-19-32" name="__codelineno-19-32" href="#__codelineno-19-32"></a><span class="w">    </span><span class="nt">&lt;/dependency&gt;</span>
+<a id="__codelineno-19-33" name="__codelineno-19-33" href="#__codelineno-19-33"></a><span class="nt">&lt;/dependencies&gt;</span>
+</code></pre></div>
+<hr />
+<h2 id="paso-7-crear-los-package-infojava">Paso 7: Crear los package-info.java<a class="headerlink" href="#paso-7-crear-los-package-infojava" title="Permanent link">&para;</a></h2>
+<p>Los <code>package-info.java</code> son la forma de declararle a Spring Modulith las reglas de cada módulo. Son archivos Java válidos — solo contienen la declaración del paquete con sus anotaciones. Sin ellos, Spring Modulith usa la configuración por defecto: módulo CLOSED sin restricciones declaradas.</p>
+<div class="admonition info">
+<p class="admonition-title">¿Por qué en package-info.java y no en una clase?</p>
+<p>La anotación <code>@ApplicationModule</code> va sobre el <strong>paquete</strong>, no sobre una clase. En Java, la única forma de anotar un paquete es con <code>package-info.java</code>. Es un archivo especial que el compilador procesa como metadato del paquete — no genera una clase <code>.class</code> por sí solo.</p>
+<p>El archivo debe llamarse exactamente <code>package-info.java</code> y vivir en la raíz del paquete que quieres anotar.</p>
+</div>
+<h3 id="commonpackage-infojava"><code>common/package-info.java</code><a class="headerlink" href="#commonpackage-infojava" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">// src/main/java/com/geovannycode/bookstore/common/package-info.java</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="cm">/**</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="cm"> * Módulo common: utilidades compartidas.</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="cm"> *</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="cm"> * Al ser OPEN, expone todo su contenido incluyendo sub-paquetes.</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="cm"> * Sin esta declaración, PagedResult estaría en common/models/ y</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="cm"> * Spring Modulith lo trataría como privado — otros módulos no podrían usarlo.</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="cm"> *</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="cm"> * Solo los módulos de utilidades genuinamente transversales deberían ser OPEN.</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="cm"> * Un módulo de dominio nunca debería serlo.</span>
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="cm"> */</span>
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="nd">@ApplicationModule</span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ApplicationModule</span><span class="p">.</span><span class="na">Type</span><span class="p">.</span><span class="na">OPEN</span><span class="p">)</span>
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.common</span><span class="p">;</span>
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.modulith.ApplicationModule</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="orderspackage-infojava"><code>orders/package-info.java</code><a class="headerlink" href="#orderspackage-infojava" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1">// src/main/java/com/geovannycode/bookstore/orders/package-info.java</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="cm">/**</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="cm"> * Módulo orders: gestión del ciclo de vida de las órdenes.</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="cm"> *</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="cm"> * allowedDependencies declara con exactitud los módulos con los que</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="cm"> * orders puede hablar. Si alguien agrega una dependencia a inventory</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="cm"> * desde aquí, ModularityTest falla con este mensaje:</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="cm"> * &quot;Module &#39;orders&#39; depends on module &#39;inventory&#39;. Allowed targets: catalog, common.&quot;</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="cm"> *</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="cm"> * Incluimos &quot;common&quot; porque OrderRestController usa PagedResult.</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="cm"> */</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="nd">@ApplicationModule</span><span class="p">(</span><span class="n">allowedDependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;catalog&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;common&quot;</span><span class="p">})</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders</span><span class="p">;</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.modulith.ApplicationModule</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="inventorypackage-infojava"><code>inventory/package-info.java</code><a class="headerlink" href="#inventorypackage-infojava" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// src/main/java/com/geovannycode/bookstore/inventory/package-info.java</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="cm">/**</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="cm"> * Módulo inventory: gestión de stock.</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="cm"> *</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="cm"> * Sin allowedDependencies: inventory no llama a nadie.</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="cm"> * Solo escucha eventos. Es el módulo más independiente del sistema.</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="cm"> *</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="cm"> * Puede importar OrderCreatedEvent de orders porque ese evento está</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="cm"> * en la raíz del módulo orders — su API pública.</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="cm"> */</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="nd">@ApplicationModule</span>
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.inventory</span><span class="p">;</span>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.modulith.ApplicationModule</span><span class="p">;</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">catalog no necesita package-info.java en esta parte</p>
+<p><code>catalog</code> es CLOSED por defecto, que es lo que queremos. No tiene restricciones especiales que declarar. En la Parte 3 cuando implementemos CQRS tampoco lo necesitará.</p>
+</div>
+<hr />
+<h2 id="paso-8-crear-el-dto-publico-productjava">Paso 8: Crear el DTO público Product.java<a class="headerlink" href="#paso-8-crear-el-dto-publico-productjava" title="Permanent link">&para;</a></h2>
+<p><code>ProductEntity</code> vive en <code>catalog/command/</code> — un sub-paquete privado. El módulo <code>orders</code> necesita datos del producto para crear una orden, pero no puede importar <code>ProductEntity</code> porque es un tipo interno de otro módulo.</p>
+<p>La solución correcta es un DTO en la raíz de <code>catalog/</code> con solo los campos que el exterior necesita.</p>
+<div class="admonition warning">
+<p class="admonition-title">Nunca expongas entidades JPA como API pública de un módulo</p>
+<p>Si <code>CatalogApi</code> retornara <code>ProductEntity</code>, otros módulos sabrían que <code>catalog</code> usa JPA, que tiene una tabla <code>products</code>, que esa entidad tiene un campo <code>id</code> de tipo <code>Long</code>. Ese es el acoplamiento implícito que los módulos buscan eliminar.</p>
+<p>Cuando mañana decides migrar <code>catalog</code> a un modelo diferente — o extraerlo como microservicio — todos los módulos que importaban <code>ProductEntity</code> tendrían que cambiar también.</p>
+</div>
+<p>Crea <code>catalog/Product.java</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog</span><span class="p">;</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.math.BigDecimal</span><span class="p">;</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="cm">/**</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="cm"> * DTO público del módulo catalog.</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="cm"> *</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="cm"> * Es el único contrato que catalog expone al resto del sistema.</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="cm"> * ProductEntity permanece invisible dentro de catalog/command/.</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="cm"> *</span>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="cm"> * En la Parte 3, cuando implementemos CQRS, este record también</span>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="cm"> * incluirá averageRating y reviewCount del read model.</span>
+<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="cm"> */</span>
+<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Product</span><span class="p">(</span>
+<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">code</span><span class="p">,</span>
+<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span>
+<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">description</span><span class="p">,</span>
+<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">imageUrl</span><span class="p">,</span>
+<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a><span class="w">        </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">price</span><span class="p">,</span>
+<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">category</span>
+<a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+</code></pre></div>
+<hr />
+<h2 id="paso-9-crear-catalogapi">Paso 9: Crear CatalogApi<a class="headerlink" href="#paso-9-crear-catalogapi" title="Permanent link">&para;</a></h2>
+<p><code>CatalogApi</code> es la puerta de entrada al módulo <code>catalog</code>. Vive en la raíz del módulo para que sea accesible desde fuera. En esta parte delega a <code>ProductCommandService</code>. En la Parte 3 también delegará a <code>ProductQueryService</code>.</p>
+<p>El método <code>toProduct()</code> es el mapper que convierte <code>ProductEntity</code> → <code>Product</code>. Esta conversión ocurre dentro del módulo <code>catalog</code>, donde es legítima. Ningún módulo externo sabe que <code>ProductEntity</code> existe.</p>
+<p>Crea <code>catalog/CatalogApi.java</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog</span><span class="p">;</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.command.ProductCommandService</span><span class="p">;</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.command.ProductEntity</span><span class="p">;</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.common.models.PagedResult</span><span class="p">;</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Service</span><span class="p">;</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Optional</span><span class="p">;</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="cm">/**</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="cm"> * API pública del módulo catalog.</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a><span class="cm"> *</span>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a><span class="cm"> * Único punto de entrada para que otros módulos interactúen con catalog.</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="cm"> * Retorna Product (DTO público), nunca ProductEntity (tipo interno).</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a><span class="cm"> *</span>
+<a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a><span class="cm"> *   orders → CatalogApi.getByCode()     ✅ correcto</span>
+<a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a><span class="cm"> *   orders → ProductCommandService      ❌ tipo interno de catalog</span>
+<a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a><span class="cm"> *   orders → ProductRepository          ❌ implementación interna de catalog</span>
+<a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a><span class="cm"> *   orders → ProductEntity              ❌ tipo interno de catalog</span>
+<a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a><span class="cm"> */</span>
+<a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a><span class="nd">@Service</span>
+<a id="__codelineno-24-23" name="__codelineno-24-23" href="#__codelineno-24-23"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CatalogApi</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-24" name="__codelineno-24-24" href="#__codelineno-24-24"></a>
+<a id="__codelineno-24-25" name="__codelineno-24-25" href="#__codelineno-24-25"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ProductCommandService</span><span class="w"> </span><span class="n">productService</span><span class="p">;</span>
+<a id="__codelineno-24-26" name="__codelineno-24-26" href="#__codelineno-24-26"></a>
+<a id="__codelineno-24-27" name="__codelineno-24-27" href="#__codelineno-24-27"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CatalogApi</span><span class="p">(</span><span class="n">ProductCommandService</span><span class="w"> </span><span class="n">productService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-28" name="__codelineno-24-28" href="#__codelineno-24-28"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">productService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">productService</span><span class="p">;</span>
+<a id="__codelineno-24-29" name="__codelineno-24-29" href="#__codelineno-24-29"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-30" name="__codelineno-24-30" href="#__codelineno-24-30"></a>
+<a id="__codelineno-24-31" name="__codelineno-24-31" href="#__codelineno-24-31"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Product</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getByCode</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">code</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-32" name="__codelineno-24-32" href="#__codelineno-24-32"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">productService</span><span class="p">.</span><span class="na">getByCode</span><span class="p">(</span><span class="n">code</span><span class="p">).</span><span class="na">map</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">toProduct</span><span class="p">);</span>
+<a id="__codelineno-24-33" name="__codelineno-24-33" href="#__codelineno-24-33"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-34" name="__codelineno-24-34" href="#__codelineno-24-34"></a>
+<a id="__codelineno-24-35" name="__codelineno-24-35" href="#__codelineno-24-35"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Product</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getByCategory</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">category</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-36" name="__codelineno-24-36" href="#__codelineno-24-36"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">productService</span><span class="p">.</span><span class="na">getByCategory</span><span class="p">(</span><span class="n">category</span><span class="p">)</span>
+<a id="__codelineno-24-37" name="__codelineno-24-37" href="#__codelineno-24-37"></a><span class="w">                </span><span class="p">.</span><span class="na">stream</span><span class="p">()</span>
+<a id="__codelineno-24-38" name="__codelineno-24-38" href="#__codelineno-24-38"></a><span class="w">                </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">toProduct</span><span class="p">)</span>
+<a id="__codelineno-24-39" name="__codelineno-24-39" href="#__codelineno-24-39"></a><span class="w">                </span><span class="p">.</span><span class="na">toList</span><span class="p">();</span>
+<a id="__codelineno-24-40" name="__codelineno-24-40" href="#__codelineno-24-40"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-41" name="__codelineno-24-41" href="#__codelineno-24-41"></a>
+<a id="__codelineno-24-42" name="__codelineno-24-42" href="#__codelineno-24-42"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Product</span><span class="w"> </span><span class="nf">toProduct</span><span class="p">(</span><span class="n">ProductEntity</span><span class="w"> </span><span class="n">entity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-43" name="__codelineno-24-43" href="#__codelineno-24-43"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Product</span><span class="p">(</span>
+<a id="__codelineno-24-44" name="__codelineno-24-44" href="#__codelineno-24-44"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getCode</span><span class="p">(),</span>
+<a id="__codelineno-24-45" name="__codelineno-24-45" href="#__codelineno-24-45"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span>
+<a id="__codelineno-24-46" name="__codelineno-24-46" href="#__codelineno-24-46"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getDescription</span><span class="p">(),</span>
+<a id="__codelineno-24-47" name="__codelineno-24-47" href="#__codelineno-24-47"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getImageUrl</span><span class="p">(),</span>
+<a id="__codelineno-24-48" name="__codelineno-24-48" href="#__codelineno-24-48"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getPrice</span><span class="p">(),</span>
+<a id="__codelineno-24-49" name="__codelineno-24-49" href="#__codelineno-24-49"></a><span class="w">                </span><span class="n">entity</span><span class="p">.</span><span class="na">getCategory</span><span class="p">()</span>
+<a id="__codelineno-24-50" name="__codelineno-24-50" href="#__codelineno-24-50"></a><span class="w">        </span><span class="p">);</span>
+<a id="__codelineno-24-51" name="__codelineno-24-51" href="#__codelineno-24-51"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-52" name="__codelineno-24-52" href="#__codelineno-24-52"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="paso-10-actualizar-orderservice">Paso 10: Actualizar OrderService<a class="headerlink" href="#paso-10-actualizar-orderservice" title="Permanent link">&para;</a></h2>
+<p><code>OrderService</code> del starter tenía tres problemas: inyectaba <code>ProductRepository</code> directamente, inyectaba <code>InventoryRepository</code> directamente y manipulaba el stock de inventory desde el módulo orders.</p>
+<p>Los tres salen. Así queda después de la migración:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders.domain</span><span class="p">;</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.catalog.CatalogApi</span><span class="p">;</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore.orders.OrderCreatedEvent</span><span class="p">;</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.context.ApplicationEventPublisher</span><span class="p">;</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.stereotype.Service</span><span class="p">;</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.transaction.annotation.Transactional</span><span class="p">;</span>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.UUID</span><span class="p">;</span>
+<a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>
+<a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a><span class="nd">@Service</span>
+<a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a><span class="nd">@Transactional</span>
+<a id="__codelineno-25-15" name="__codelineno-25-15" href="#__codelineno-25-15"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-25-16" name="__codelineno-25-16" href="#__codelineno-25-16"></a>
+<a id="__codelineno-25-17" name="__codelineno-25-17" href="#__codelineno-25-17"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">OrderService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<a id="__codelineno-25-18" name="__codelineno-25-18" href="#__codelineno-25-18"></a>
+<a id="__codelineno-25-19" name="__codelineno-25-19" href="#__codelineno-25-19"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">OrderRepository</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">;</span>
+<a id="__codelineno-25-20" name="__codelineno-25-20" href="#__codelineno-25-20"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CatalogApi</span><span class="w"> </span><span class="n">catalogApi</span><span class="p">;</span>
+<a id="__codelineno-25-21" name="__codelineno-25-21" href="#__codelineno-25-21"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ApplicationEventPublisher</span><span class="w"> </span><span class="n">eventPublisher</span><span class="p">;</span>
+<a id="__codelineno-25-22" name="__codelineno-25-22" href="#__codelineno-25-22"></a>
+<a id="__codelineno-25-23" name="__codelineno-25-23" href="#__codelineno-25-23"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">OrderService</span><span class="p">(</span><span class="n">OrderRepository</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">,</span>
+<a id="__codelineno-25-24" name="__codelineno-25-24" href="#__codelineno-25-24"></a><span class="w">                        </span><span class="n">CatalogApi</span><span class="w"> </span><span class="n">catalogApi</span><span class="p">,</span>
+<a id="__codelineno-25-25" name="__codelineno-25-25" href="#__codelineno-25-25"></a><span class="w">                        </span><span class="n">ApplicationEventPublisher</span><span class="w"> </span><span class="n">eventPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-25-26" name="__codelineno-25-26" href="#__codelineno-25-26"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">orderRepository</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">;</span>
+<a id="__codelineno-25-27" name="__codelineno-25-27" href="#__codelineno-25-27"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">catalogApi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">catalogApi</span><span class="p">;</span>
+<a id="__codelineno-25-28" name="__codelineno-25-28" href="#__codelineno-25-28"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">eventPublisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">eventPublisher</span><span class="p">;</span>
+<a id="__codelineno-25-29" name="__codelineno-25-29" href="#__codelineno-25-29"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-25-30" name="__codelineno-25-30" href="#__codelineno-25-30"></a>
+<a id="__codelineno-25-31" name="__codelineno-25-31" href="#__codelineno-25-31"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CreateOrderResponse</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="n">CreateOrderRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-25-32" name="__codelineno-25-32" href="#__codelineno-25-32"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">catalogApi</span><span class="p">.</span><span class="na">getByCode</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">productCode</span><span class="p">())</span>
+<a id="__codelineno-25-33" name="__codelineno-25-33" href="#__codelineno-25-33"></a><span class="w">                </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">InvalidOrderException</span><span class="p">(</span>
+<a id="__codelineno-25-34" name="__codelineno-25-34" href="#__codelineno-25-34"></a><span class="w">                        </span><span class="s">&quot;Producto no encontrado: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">productCode</span><span class="p">()));</span>
+<a id="__codelineno-25-35" name="__codelineno-25-35" href="#__codelineno-25-35"></a>
+<a id="__codelineno-25-36" name="__codelineno-25-36" href="#__codelineno-25-36"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">orderNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ORD-&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">UUID</span><span class="p">.</span><span class="na">randomUUID</span><span class="p">()</span>
+<a id="__codelineno-25-37" name="__codelineno-25-37" href="#__codelineno-25-37"></a><span class="w">                </span><span class="p">.</span><span class="na">toString</span><span class="p">().</span><span class="na">substring</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">).</span><span class="na">toUpperCase</span><span class="p">();</span>
+<a id="__codelineno-25-38" name="__codelineno-25-38" href="#__codelineno-25-38"></a>
+<a id="__codelineno-25-39" name="__codelineno-25-39" href="#__codelineno-25-39"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">OrderEntity</span><span class="p">(</span>
+<a id="__codelineno-25-40" name="__codelineno-25-40" href="#__codelineno-25-40"></a><span class="w">                </span><span class="n">orderNumber</span><span class="p">,</span>
+<a id="__codelineno-25-41" name="__codelineno-25-41" href="#__codelineno-25-41"></a><span class="w">                </span><span class="n">request</span><span class="p">.</span><span class="na">customerName</span><span class="p">(),</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">customerEmail</span><span class="p">(),</span>
+<a id="__codelineno-25-42" name="__codelineno-25-42" href="#__codelineno-25-42"></a><span class="w">                </span><span class="n">request</span><span class="p">.</span><span class="na">customerPhone</span><span class="p">(),</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">deliveryAddress</span><span class="p">(),</span>
+<a id="__codelineno-25-43" name="__codelineno-25-43" href="#__codelineno-25-43"></a><span class="w">                </span><span class="n">product</span><span class="p">.</span><span class="na">code</span><span class="p">(),</span><span class="w"> </span><span class="n">product</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span>
+<a id="__codelineno-25-44" name="__codelineno-25-44" href="#__codelineno-25-44"></a><span class="w">                </span><span class="n">product</span><span class="p">.</span><span class="na">price</span><span class="p">(),</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">quantity</span><span class="p">()</span>
+<a id="__codelineno-25-45" name="__codelineno-25-45" href="#__codelineno-25-45"></a><span class="w">        </span><span class="p">);</span>
+<a id="__codelineno-25-46" name="__codelineno-25-46" href="#__codelineno-25-46"></a>
+<a id="__codelineno-25-47" name="__codelineno-25-47" href="#__codelineno-25-47"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="n">saved</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">order</span><span class="p">);</span>
+<a id="__codelineno-25-48" name="__codelineno-25-48" href="#__codelineno-25-48"></a><span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Orden creada: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">orderNumber</span><span class="p">);</span>
+<a id="__codelineno-25-49" name="__codelineno-25-49" href="#__codelineno-25-49"></a>
+<a id="__codelineno-25-50" name="__codelineno-25-50" href="#__codelineno-25-50"></a><span class="w">        </span><span class="c1">// El descuento de stock lo hace inventory cuando reciba este evento.</span>
+<a id="__codelineno-25-51" name="__codelineno-25-51" href="#__codelineno-25-51"></a><span class="w">        </span><span class="c1">// En la Parte 4 mejoraremos esto con @ApplicationModuleListener</span>
+<a id="__codelineno-25-52" name="__codelineno-25-52" href="#__codelineno-25-52"></a><span class="w">        </span><span class="c1">// y el Event Publication Registry para garantizar la entrega.</span>
+<a id="__codelineno-25-53" name="__codelineno-25-53" href="#__codelineno-25-53"></a><span class="w">        </span><span class="n">eventPublisher</span><span class="p">.</span><span class="na">publishEvent</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">OrderCreatedEvent</span><span class="p">(</span>
+<a id="__codelineno-25-54" name="__codelineno-25-54" href="#__codelineno-25-54"></a><span class="w">                </span><span class="n">saved</span><span class="p">.</span><span class="na">getOrderNumber</span><span class="p">(),</span>
+<a id="__codelineno-25-55" name="__codelineno-25-55" href="#__codelineno-25-55"></a><span class="w">                </span><span class="n">product</span><span class="p">.</span><span class="na">code</span><span class="p">(),</span>
+<a id="__codelineno-25-56" name="__codelineno-25-56" href="#__codelineno-25-56"></a><span class="w">                </span><span class="n">product</span><span class="p">.</span><span class="na">name</span><span class="p">(),</span>
+<a id="__codelineno-25-57" name="__codelineno-25-57" href="#__codelineno-25-57"></a><span class="w">                </span><span class="n">product</span><span class="p">.</span><span class="na">price</span><span class="p">(),</span>
+<a id="__codelineno-25-58" name="__codelineno-25-58" href="#__codelineno-25-58"></a><span class="w">                </span><span class="n">request</span><span class="p">.</span><span class="na">quantity</span><span class="p">(),</span>
+<a id="__codelineno-25-59" name="__codelineno-25-59" href="#__codelineno-25-59"></a><span class="w">                </span><span class="n">request</span><span class="p">.</span><span class="na">customerName</span><span class="p">(),</span>
+<a id="__codelineno-25-60" name="__codelineno-25-60" href="#__codelineno-25-60"></a><span class="w">                </span><span class="n">request</span><span class="p">.</span><span class="na">customerEmail</span><span class="p">()</span>
+<a id="__codelineno-25-61" name="__codelineno-25-61" href="#__codelineno-25-61"></a><span class="w">        </span><span class="p">));</span>
+<a id="__codelineno-25-62" name="__codelineno-25-62" href="#__codelineno-25-62"></a>
+<a id="__codelineno-25-63" name="__codelineno-25-63" href="#__codelineno-25-63"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CreateOrderResponse</span><span class="p">(</span><span class="n">orderNumber</span><span class="p">);</span>
+<a id="__codelineno-25-64" name="__codelineno-25-64" href="#__codelineno-25-64"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-25-65" name="__codelineno-25-65" href="#__codelineno-25-65"></a>
+<a id="__codelineno-25-66" name="__codelineno-25-66" href="#__codelineno-25-66"></a><span class="w">    </span><span class="nd">@Transactional</span><span class="p">(</span><span class="n">readOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-25-67" name="__codelineno-25-67" href="#__codelineno-25-67"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">OrderEntity</span><span class="w"> </span><span class="nf">getByOrderNumber</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">orderNumber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-25-68" name="__codelineno-25-68" href="#__codelineno-25-68"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">orderRepository</span><span class="p">.</span><span class="na">findByOrderNumber</span><span class="p">(</span><span class="n">orderNumber</span><span class="p">)</span>
+<a id="__codelineno-25-69" name="__codelineno-25-69" href="#__codelineno-25-69"></a><span class="w">                </span><span class="p">.</span><span class="na">orElseThrow</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">OrderNotFoundException</span><span class="p">(</span><span class="n">orderNumber</span><span class="p">));</span>
+<a id="__codelineno-25-70" name="__codelineno-25-70" href="#__codelineno-25-70"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-25-71" name="__codelineno-25-71" href="#__codelineno-25-71"></a><span class="p">}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Qué eliminar exactamente del OrderService del starter</p>
+<p>Busca y elimina estas líneas en el método <code>create()</code> del starter:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1">// ELIMINA el campo y el parámetro del constructor</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">InventoryRepository</span><span class="w"> </span><span class="n">inventoryRepository</span><span class="p">;</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="c1">// ELIMINA del constructor</span>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="n">InventoryRepository</span><span class="w"> </span><span class="n">inventoryRepository</span><span class="p">,</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a><span class="c1">// ELIMINA las 5 líneas de lógica de inventory en create()</span>
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a><span class="kd">var</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inventoryRepository</span><span class="p">.</span><span class="na">findByProductCode</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">productCode</span><span class="p">())...</span>
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stock</span><span class="p">.</span><span class="na">getStockLevel</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">quantity</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a><span class="n">stock</span><span class="p">.</span><span class="na">decreaseStock</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">quantity</span><span class="p">());</span>
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="n">inventoryRepository</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">stock</span><span class="p">);</span>
+</code></pre></div>
+<p>Después limpia los imports — ningún import del paquete <code>inventory</code> debe quedar en <code>OrderService</code>.</p>
+<p>Verifica:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;inventory&quot;</span><span class="w"> </span>src/main/java/com/geovannycode/bookstore/orders/domain/OrderService.java
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="c1"># No debe mostrar nada</span>
+</code></pre></div></p>
+</div>
+<hr />
+<h2 id="paso-11-crear-el-modularitytest">Paso 11: Crear el ModularityTest<a class="headerlink" href="#paso-11-crear-el-modularitytest" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1">// src/test/java/com/geovannycode/bookstore/ModularityTest.java</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.geovannycode.bookstore</span><span class="p">;</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.modulith.core.ApplicationModules</span><span class="p">;</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="cm">/**</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="cm"> * Guardián de la arquitectura modular.</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="cm"> *</span>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="cm"> * No necesita Spring, no necesita base de datos, no necesita Docker.</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="cm"> * Analiza el bytecode estáticamente y verifica que se cumplan</span>
+<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a><span class="cm"> * todas las reglas declaradas en los package-info.java.</span>
+<a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a><span class="cm"> *</span>
+<a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a><span class="cm"> * Si alguien agrega una dependencia incorrecta entre módulos,</span>
+<a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a><span class="cm"> * este test falla en segundos con el mensaje exacto.</span>
+<a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a><span class="cm"> */</span>
+<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a><span class="kd">class</span> <span class="nc">ModularityTest</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a>
+<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a><span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ApplicationModules</span><span class="w"> </span><span class="n">modules</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a><span class="w">            </span><span class="n">ApplicationModules</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">BookstoreApplication</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a>
+<a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a><span class="w">    </span><span class="nd">@Test</span>
+<a id="__codelineno-28-23" name="__codelineno-28-23" href="#__codelineno-28-23"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">verifiesModularStructure</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-24" name="__codelineno-28-24" href="#__codelineno-28-24"></a><span class="w">        </span><span class="n">modules</span><span class="p">.</span><span class="na">verify</span><span class="p">();</span>
+<a id="__codelineno-28-25" name="__codelineno-28-25" href="#__codelineno-28-25"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a>
+<a id="__codelineno-28-27" name="__codelineno-28-27" href="#__codelineno-28-27"></a><span class="w">    </span><span class="nd">@Test</span>
+<a id="__codelineno-28-28" name="__codelineno-28-28" href="#__codelineno-28-28"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">printsModuleStructure</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-28-29" name="__codelineno-28-29" href="#__codelineno-28-29"></a><span class="w">        </span><span class="c1">// Muestra módulos detectados, sus beans y dependencias.</span>
+<a id="__codelineno-28-30" name="__codelineno-28-30" href="#__codelineno-28-30"></a><span class="w">        </span><span class="c1">// Corre este método primero para entender qué vio Spring Modulith.</span>
+<a id="__codelineno-28-31" name="__codelineno-28-31" href="#__codelineno-28-31"></a><span class="w">        </span><span class="n">modules</span><span class="p">.</span><span class="na">forEach</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">::</span><span class="n">println</span><span class="p">);</span>
+<a id="__codelineno-28-32" name="__codelineno-28-32" href="#__codelineno-28-32"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-28-33" name="__codelineno-28-33" href="#__codelineno-28-33"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="ejecutar">Ejecutar<a class="headerlink" href="#ejecutar" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>mvn<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-Dtest<span class="o">=</span>ModularityTest
+</code></pre></div>
+<hr />
+<h2 id="paso-12-leer-y-resolver-las-violaciones">Paso 12: Leer y resolver las violaciones<a class="headerlink" href="#paso-12-leer-y-resolver-las-violaciones" title="Permanent link">&para;</a></h2>
+<p>Cuando el test falla, el output lista cada violación con la clase exacta que la causa. Vamos una por una.</p>
+<div class="admonition tip">
+<p class="admonition-title">Cómo leer los mensajes de Spring Modulith</p>
+<p>Cada violación tiene la forma:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>Module &#39;A&#39; depends on non-exposed type
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>com.geovannycode.bookstore.B.SomeInternalClass
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>within module &#39;B&#39;!
+</code></pre></div>
+La lectura es: alguna clase en el módulo <code>A</code> importa o referencia <code>SomeInternalClass</code> que está en un sub-paquete privado del módulo <code>B</code>. Abre la clase del módulo <code>A</code>, busca cualquier referencia a <code>SomeInternalClass</code> o a su paquete y corrígela.</p>
+</div>
+<h3 id="violacion-ciclo-orders-inventory">Violación: ciclo <code>orders ↔ inventory</code><a class="headerlink" href="#violacion-ciclo-orders-inventory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>Cycle detected: Slice inventory → Slice orders → Slice inventory
+</code></pre></div>
+<p>Existe porque <code>OrderService</code> todavía tiene <code>InventoryRepository</code> (orders → inventory) y <code>OrderEventsInventoryHandler</code> usa <code>OrderCreatedEvent</code> (inventory → orders). Con las dos dependencias juntas hay un ciclo.</p>
+<p>El Paso 10 ya elimina <code>InventoryRepository</code> de <code>OrderService</code>. Verifica que no quedó ningún rastro:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;InventoryRepository\|InventoryEntity&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span>src/main/java/com/geovannycode/bookstore/orders/
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="c1"># No debe mostrar nada</span>
+</code></pre></div>
+<h3 id="violacion-orders-usa-common-sin-declararlo">Violación: <code>orders</code> usa <code>common</code> sin declararlo<a class="headerlink" href="#violacion-orders-usa-common-sin-declararlo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>Module &#39;orders&#39; depends on module &#39;common&#39; via OrderRestController → PagedResult.
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>Allowed targets: catalog.
+</code></pre></div>
+<p><code>OrderRestController</code> usa <code>PagedResult</code> de <code>common</code> pero el <code>package-info.java</code> de <code>orders</code> solo declaró <code>catalog</code>. Ya está corregido en el Paso 7 con <code>allowedDependencies = {"catalog", "common"}</code>.</p>
+<h3 id="violacion-orders-accede-a-productentity-tipo-interno">Violación: <code>orders</code> accede a <code>ProductEntity</code> (tipo interno)<a class="headerlink" href="#violacion-orders-accede-a-productentity-tipo-interno" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>Module &#39;orders&#39; depends on module &#39;catalog&#39; via OrderService → ProductEntity.
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>Allowed targets: catalog.
+</code></pre></div>
+<p><code>catalog</code> está en <code>allowedDependencies</code> pero <code>ProductEntity</code> vive en <code>catalog/command/</code> — un sub-paquete privado. Estar en <code>allowedDependencies</code> permite usar lo que está en la raíz del módulo, no sus internos.</p>
+<p>El Paso 9 y 10 resuelven esto: <code>CatalogApi</code> retorna <code>Product</code> (DTO público) y <code>OrderService</code> usa <code>Product</code> en lugar de <code>ProductEntity</code>.</p>
+<p>Verifica:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>grep<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;ProductEntity&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="w">  </span>src/main/java/com/geovannycode/bookstore/orders/domain/OrderService.java
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="c1"># No debe mostrar nada</span>
+</code></pre></div>
+<h3 id="ejecutar-el-test-de-nuevo">Ejecutar el test de nuevo<a class="headerlink" href="#ejecutar-el-test-de-nuevo" title="Permanent link">&para;</a></h3>
+<p>Con todos los fixes aplicados:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>mvn<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-Dtest<span class="o">=</span>ModularityTest
+</code></pre></div>
+<p>Resultado esperado:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>BUILD SUCCESS
+</code></pre></div>
+<hr />
+<h2 id="que-significa-que-el-test-pase">¿Qué significa que el test pase?<a class="headerlink" href="#que-significa-que-el-test-pase" title="Permanent link">&para;</a></h2>
+<p>Spring Modulith analizó todo el bytecode del proyecto y verificó que:</p>
+<ul>
+<li>Ningún módulo accede a tipos internos de otro módulo</li>
+<li>No hay dependencias circulares</li>
+<li>Las dependencias declaradas en <code>allowedDependencies</code> son las únicas que existen</li>
+<li>Los módulos OPEN están correctamente configurados</li>
+</ul>
+<p>Cada vez que alguien hace un commit, este test corre en el pipeline. Si introduce una dependencia incorrecta, el build falla con el mensaje exacto de qué rompió. Sin revisión manual de código, sin linters externos, sin reglas en un wiki.</p>
+<hr />
+<h2 id="resumen-de-conceptos">Resumen de conceptos<a class="headerlink" href="#resumen-de-conceptos" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Qué aprendiste</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Package-by-feature</td>
+<td>El código se organiza por dominio de negocio, no por capa técnica</td>
+</tr>
+<tr>
+<td>Módulo OPEN</td>
+<td><code>@ApplicationModule(type = OPEN)</code> expone todos sus sub-paquetes</td>
+</tr>
+<tr>
+<td><code>allowedDependencies</code></td>
+<td>Declara exactamente qué módulos puede usar el tuyo</td>
+</tr>
+<tr>
+<td>API pública del módulo</td>
+<td>Clases en la raíz — el único contrato visible desde afuera</td>
+</tr>
+<tr>
+<td>DTO público</td>
+<td>Nunca expongas entidades JPA como API pública; crea un record</td>
+</tr>
+<tr>
+<td><code>package-info.java</code></td>
+<td>Archivo Java para anotar un paquete con reglas modulares</td>
+</tr>
+<tr>
+<td><code>ModularityTest</code></td>
+<td>Verifica toda la arquitectura en cada build</td>
+</tr>
+<tr>
+<td><code>FlywayConfig</code></td>
+<td>Bean explícito que garantiza orden de inicialización en Boot 4.x</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="checklist">Checklist<a class="headerlink" href="#checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Directorios creados: <code>catalog/command/</code>, <code>catalog/web/</code>, <code>orders/domain/</code>, <code>orders/web/</code>, <code>inventory/</code>, <code>common/models/</code></li>
+<li>[ ] Clases movidas con <code>package</code> declarations actualizados</li>
+<li>[ ] Método <code>getAll</code> eliminado de <code>OrderRestController</code> y de <code>OrderService</code></li>
+<li>[ ] <code>FlywayConfig.java</code> creado en <code>config/</code></li>
+<li>[ ] <code>spring.flyway.enabled=false</code> en <code>application.properties</code></li>
+<li>[ ] Spring Modulith agregado al <code>pom.xml</code> (core + test)</li>
+<li>[ ] <code>common/package-info.java</code> con <code>@ApplicationModule(type = OPEN)</code></li>
+<li>[ ] <code>orders/package-info.java</code> con <code>allowedDependencies = {"catalog", "common"}</code></li>
+<li>[ ] <code>inventory/package-info.java</code> con <code>@ApplicationModule</code></li>
+<li>[ ] <code>GlobalExceptionHandler</code> eliminado</li>
+<li>[ ] <code>CatalogExceptionHandler</code> en <code>catalog/web/</code> con <code>basePackages</code></li>
+<li>[ ] <code>OrdersExceptionHandler</code> en <code>orders/web/</code> con <code>basePackages</code></li>
+<li>[ ] <code>Product.java</code> record creado en la raíz de <code>catalog/</code></li>
+<li>[ ] <code>CatalogApi.java</code> creado retornando <code>Product</code>, no <code>ProductEntity</code></li>
+<li>[ ] <code>InventoryRepository</code> eliminado de <code>OrderService</code> incluyendo imports</li>
+<li>[ ] <code>ProductEntity</code> eliminado de <code>OrderService</code> incluyendo imports</li>
+<li>[ ] <code>OrderService</code> actualizado para usar <code>CatalogApi</code> y tipo <code>Product</code></li>
+<li>[ ] <code>OrderCreatedEvent</code> en la raíz de <code>orders/</code> verificado con <code>find</code></li>
+<li>[ ] <code>ModularityTest</code> pasa ✅</li>
+</ul>
+<hr />
+<p><strong>Anterior</strong>: <a href="../parte_0/">Parte 0 — El Antes</a> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Siguiente</strong>: <a href="../parte_2/">Parte 2 — Boundaries y Reglas Modulares</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Volver al principio
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "toc.integrate", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado al portapapeles", "clipboard.copy": "Copiar al portapapeles", "search.result.more.one": "1 m\u00e1s en esta p\u00e1gina", "search.result.more.other": "# m\u00e1s en esta p\u00e1gina", "search.result.none": "No se encontraron documentos", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Teclee para comenzar b\u00fasqueda", "search.result.term.missing": "Falta", "select.version": "Seleccionar versi\u00f3n"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
